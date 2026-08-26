@@ -1,0 +1,7 @@
+project = librenderdoc
+
+using version
+using config
+using test
+using install
+using dist

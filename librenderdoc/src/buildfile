@@ -1,0 +1,43 @@
+intf_libs = # Interface dependencies.
+impl_libs = # Implementation dependencies.
+#import xxxx_libs += libhello%lib{hello}
+
+lib{renderdoc}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+
+# Build options.
+#
+out_pfx = [dir_path] $out_root/src/
+src_pfx = [dir_path] $src_root/src/
+
+cxx.poptions =+ "-I$out_pfx" "-I$src_pfx"
+
+#obja{*}: cxx.poptions += -DLIBRENDERDOC_STATIC_BUILD
+#objs{*}: cxx.poptions += -DLIBRENDERDOC_SHARED_BUILD
+
+# Export options.
+#
+lib{renderdoc}:
+{
+  cxx.export.poptions = "-I$out_pfx" "-I$src_pfx"
+  cxx.export.libs = $intf_libs
+}
+
+#liba{renderdoc}: cxx.export.poptions += -DLIBRENDERDOC_STATIC
+#libs{renderdoc}: cxx.export.poptions += -DLIBRENDERDOC_SHARED
+
+# For pre-releases use the complete version to make sure they cannot
+# be used in place of another pre-release or the final version. See
+# the version module for details on the version.* variable values.
+#
+if $version.pre_release
+  lib{renderdoc}: bin.lib.version = "-$version.project_id"
+else
+  lib{renderdoc}: bin.lib.version = "-$version.major.$version.minor"
+
+# Install recreating subdirectories.
+#
+{hxx ixx txx}{*}:
+{
+  install         = include/
+  install.subdirs = true
+}

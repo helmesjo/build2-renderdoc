@@ -50,7 +50,7 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
                 3rdparty/compressonator/{hxx cxx}{*} \
                 3rdparty/tinyexr/cxx{tinyexr_impl} \
                 3rdparty/stb/c{stb_impl} \
-                3rdparty/catch/cxx{catch} \
+                3rdparty/catch/cxx{catch_stub} \
                 $impl_libs $intf_libs
 
 lib{renderdoc}: 3rdparty/half/file{half.hpp}: include = adhoc

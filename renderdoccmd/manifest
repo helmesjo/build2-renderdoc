@@ -1,15 +1,25 @@
 : 1
 name: renderdoccmd
-version: 0.1.0-a.0.z
+version: 1.45.0-a.0.z
 language: c++
-project: build2-renderdoc
-summary: renderdoccmd C++ executable
-license: MIT ; MIT License.
+project: renderdoc
+summary: Frame-capture graphics debugger command-line tool
+license: MIT
+topics: graphics, debugger, vulkan, metal, directx
 description-file: README.md
 package-description-file: PACKAGE-README.md
-url: https://example.org/upstream
-email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-renderdoc
+url: https://renderdoc.org
+email: baldurk@baldurk.org
+doc-url: https://renderdoc.org/docs
+src-url: https://github.com/baldurk/renderdoc
+package-url: https://github.com/build2-packaging/renderdoc
 package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
+depends: librenderdoc == $
+build-include: linux**-x86_64**
+build-include: macos**
+build-include: windows**-x86_64**
+build-exclude: macos**-gcc** ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
+build-exclude: **-mingw** ; Upstream Windows is Visual Studio only.
+build-exclude: ** ; 64-bit x86 Linux, Clang macOS, and 64-bit MSVC Windows.

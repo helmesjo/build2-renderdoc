@@ -1,9 +1,10 @@
-: basics
+: version
 :
-$* 'World' >'Hello, World!'
+# Linux also prints the windowing systems line.
+#
+$* version >>~"/EOO/"
+/renderdoccmd .+ v1\.45 .*/
+/APIs supported at compile-time: .*/
+/Windowing systems supported at compile-time: .*/?
 
-: missing-name
-:
-$* 2>>EOE != 0
-error: missing name
-EOE
+EOO

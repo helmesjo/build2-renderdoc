@@ -226,8 +226,7 @@ embed_files = \
   data/glsl/depth_copyms.frag \
   data/glsl/debug_math.comp \
   data/glsl/debug_sample.frag \
-  data/hlsl/quadswizzle.hlsl \
-  driver/vulkan/renderdoc.json
+  data/hlsl/quadswizzle.hlsl
 
 for f: $embed_files
 {
@@ -243,6 +242,31 @@ for f: $embed_files
 
   lib{renderdoc}: c{$n}
 }
+
+# Same json template as the in{} layer manifests. Use the in{} target so
+# dist ships the file once.
+#
+c{driver_vulkan_renderdoc_json}: driver/vulkan/in{renderdoc.json.} exe{include-bin}
+{{
+  diag include-bin $>
+  rel = $posix_string($relative($path($<[0]), $src_base))
+  cd $src_base
+  $path($<[1]) $rel $path($>)
+}}
+lib{renderdoc}: c{driver_vulkan_renderdoc_json}
+
+# Headers included from sources but not matched by the compiled hxx globs
+# (data/glsl extras, glslang .hpp11, IHV vendor trees). Dist needs them.
+#
+lib{renderdoc}: data/hxx{resource} \
+                data/glsl/hxx{glsl_ubos_cpp} \
+                data/hlsl/hxx{hlsl_texsample hlsl_custom_prefix hlsl_cbuffers}: \
+  include = adhoc
+lib{renderdoc}: 3rdparty/glslang/SPIRV/file{spirv.hpp11}: include = adhoc
+lib{renderdoc}: driver/ihv/amd/hxx{official/**}: include = adhoc
+lib{renderdoc}: driver/ihv/nv/hxx{official/**}: include = adhoc
+lib{renderdoc}: driver/ihv/intel/hxx{official/**}: include = adhoc
+lib{renderdoc}: driver/ihv/arm/hxx{official/**}: include = adhoc
 
 # posix_libentry last so library_loaded() runs after other static
 # constructors (CMake renderdoc_libentry). Direct object, not a helper

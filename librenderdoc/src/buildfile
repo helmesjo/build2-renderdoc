@@ -284,9 +284,14 @@ obj{replay/version}: \
 # -I.../3rdparty first so "pugixml/pugixml.hpp" hits the shim, then
 # #include_next reaches the packaged header. Private paths only, never export.
 #
-cc.poptions  =+ "-I$out_pfx" "-I$src_pfx/3rdparty" "-I$src_pfx"
-cxx.poptions =+ "-I$out_pfx" "-I$src_pfx/3rdparty" "-I$src_pfx"
-c.poptions   =+ "-I$out_pfx" "-I$src_pfx/3rdparty" "-I$src_pfx"
+# In-source (dist) builds have out_pfx == src_pfx. Listing -I src before
+# -I 3rdparty makes include_next from "3rdparty/pugixml/pugixml.hpp" reopen
+# the shim. Only add the out tree when it is distinct. Prepend out last so
+# search order is out, 3rdparty, src.
+#
+cc.poptions =+ "-I$src_pfx/3rdparty" "-I$src_pfx"
+if ($out_pfx != $src_pfx)
+  cc.poptions =+ "-I$out_pfx"
 
 cc.poptions += -DRDOC_BASE_NAME=renderdoc -DRENDERDOC_EXPORTS -DRELEASE
 

@@ -2,11 +2,18 @@
 #
 #cxx.internal.scope = current
 
-cxx.std = latest
+# Upstream is C++14 (Metal C++17). latest is C++26 here and rejects PointerVal brace-init.
+cxx.std = 17
 
 using cxx
+using cxx.objcxx
 
-hxx{*}: extension = hpp
+# cocoa_window.mm uses Apple Objective-C blocks. GCC cannot parse that.
+#
+if ($cxx.target.class == 'macos' && $cc.id == 'gcc')
+  fail 'renderdoccmd requires Clang on macOS: GCC has no Objective-C blocks support'
+
+hxx{*}: extension = h
 ixx{*}: extension = ipp
 txx{*}: extension = tpp
 cxx{*}: extension = cpp

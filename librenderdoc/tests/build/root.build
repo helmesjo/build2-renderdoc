@@ -1,10 +1,11 @@
-cxx.std = latest
+# Match librenderdoc/build/root.build.
+cxx.std = 17
 
 using cxx
 
-hxx{*}: extension = hpp
+hxx{*}: extension = h
 ixx{*}: extension = ipp
-txx{*}: extension = tpp
+txx{*}: extension = inl
 cxx{*}: extension = cpp
 
 # Every exe{} in this subproject is by default a test.

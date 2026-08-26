@@ -51,10 +51,11 @@ is supported.
 Each flag compiles the corresponding graphics API driver. Metal requires
 macOS. D3D11/D3D12 require Windows.
 
-This package compiles upstream's amalgamated `metal-cpp` (RenderDoc's
-`NS::Integer` as `int64_t`, `_MTL_OPTIONS` as distinct enums, and extra
-Foundation helpers). Packaged `libmetal-cpp` 381 does not yet carry those
-patches.
+On macOS this package depends on `libmetal-cpp` with
+`config.libmetal_cpp.implementation=true`. A local `official/metal-cpp.h`
+shim remaps Metal option enums to distinct `uint64_t` types so `TypeName<>`
+and the serialiser work, and supplies `pathForResource` /
+`dataWithContentsOfFile` helpers that 381 does not declare.
 
 A Vulkan implicit layer manifest is installed to
 `etc/vulkan/implicit_layer.d/renderdoc_capture.json` when the shared library

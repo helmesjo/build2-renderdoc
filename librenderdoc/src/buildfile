@@ -48,7 +48,7 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
                 3rdparty/superluminal/{hxx cxx}{*} \
                 3rdparty/tinyfiledialogs/{hxx c}{*} \
                 3rdparty/compressonator/{hxx cxx}{*} \
-                3rdparty/tinyexr/cxx{tinyexr} \
+                3rdparty/tinyexr/cxx{tinyexr_impl} \
                 3rdparty/stb/c{stb_impl} \
                 3rdparty/catch/cxx{catch} \
                 $impl_libs $intf_libs

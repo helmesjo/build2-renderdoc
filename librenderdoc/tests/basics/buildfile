@@ -1,3 +1,16 @@
 import libs = librenderdoc%lib{renderdoc}
+import! [metadata, rule_hint=cxx.link] renderdoc = librenderdoc%lib{renderdoc}
 
 exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
+
+# The in-application API version comes from lib{renderdoc}'s
+# librenderdoc.api_version metadata, including against an installed
+# library (see ../../src/buildfile).
+#
+exe{driver}:
+{
+  cxx.poptions += \
+    "-DRENDERDOC_API_VERSION_MAJOR=$($renderdoc: librenderdoc.api_version.major)" \
+    "-DRENDERDOC_API_VERSION_MINOR=$($renderdoc: librenderdoc.api_version.minor)" \
+    "-DRENDERDOC_API_VERSION_PATCH=$($renderdoc: librenderdoc.api_version.patch)"
+}

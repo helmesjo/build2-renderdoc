@@ -1,9 +1,79 @@
-: basics
+: version
 :
-$* 'World' >'Hello, World!'
+# Linux and macOS also print the APIs and windowing-systems lines.
+# Windows prints only the version line. The APIs line must name the
+# backends enabled for this target: Vulkan and GL, plus Metal on
+# macOS. Windowing systems follow optional headers, so that line is
+# only checked to be present.
+#
+if ($cxx.target.class == 'macos')
+{
+  $* version >>~"/EOO/"
+  /renderdoccmd .+ v$version.major\\.$version.minor .*/
+  /APIs supported at compile-time: .*Vulkan, GL, Metal.*/
+  /Windowing systems supported at compile-time: .*/?
 
-: missing-name
+  EOO
+}
+elif ($cxx.target.class != 'windows')
+{
+  $* version >>~"/EOO/"
+  /renderdoccmd .+ v$version.major\\.$version.minor .*/
+  /APIs supported at compile-time: .*Vulkan, GL.*/
+  /Windowing systems supported at compile-time: .*/?
+
+  EOO
+}
+else
+{
+  $* version >>~"/EOO/"
+  /renderdoccmd .+ v$version.major\\.$version.minor .*/
+
+  EOO
+}
+
+: help
 :
-$* 2>>EOE != 0
-error: missing name
-EOE
+# Command names on stderr. Other lines, including an optional Vulkan
+# layer warning, are ignored.
+#
+$* help 2>>~'/EOO/'
+/.*
+/  capture .*/
+/.*
+/  convert .*/
+/.*
+/  embed .*/
+/.*
+/  extract .*/
+/.*
+/  inject .*/
+/.*
+/  remoteserver .*/
+/.*
+/  replay .*/
+/.*
+/  test .*/
+/.*
+/  thumb .*/
+/.*
+/  version .*/
+/.*
+EOO
+
+: list-formats
+:
+# Format ids from a capture-file session. No capture file and no GPU
+# are required.
+#
+$* convert --list-formats >>~'/EOO/'
+/.*
+/'rdc': .*/
+/.*
+/'chrome.json': .*/
+/.*
+/'xml': .*/
+/.*
+/'zip.xml': .*/
+/.*
+EOO

@@ -74,25 +74,6 @@ lib{renderdoc}: os/posix/linux/cxx{*}: include = $linux
 lib{renderdoc}: os/win32/{hxx cxx}{*}: include = $windows
 lib{renderdoc}: 3rdparty/plthook/{hxx c}{*}: include = $linux
 
-# posix_libentry is its own static archive, whole-linked into the shared
-# library so library_loaded() runs after other static constructors (CMake
-# renderdoc_libentry + Apple -force_load). Nested liba{} is not an archive
-# input, so the static variant lists the source directly.
-#
-liba{renderdoc_libentry}: os/posix/cxx{posix_libentry}: include = $posix
-liba{renderdoc_libentry}:
-{
-  install = false
-}
-
-libs{renderdoc}: liba{renderdoc_libentry}:
-{
-  bin.whole = true
-  include = $posix
-}
-
-liba{renderdoc}: os/posix/cxx{posix_libentry}: include = $posix
-
 # Vulkan driver.
 #
 lib{renderdoc}: driver/vulkan/{hxx txx cxx}{** \
@@ -262,6 +243,12 @@ for f: $embed_files
 
   lib{renderdoc}: c{$n}
 }
+
+# posix_libentry last so library_loaded() runs after other static
+# constructors (CMake renderdoc_libentry). Direct object, not a helper
+# liba{}, so install does not hit a for-install flavour clash.
+#
+lib{renderdoc}: os/posix/cxx{posix_libentry}: include = $posix
 
 # GIT_COMMIT_HASH is a compile define, not a checked-in hash.
 #

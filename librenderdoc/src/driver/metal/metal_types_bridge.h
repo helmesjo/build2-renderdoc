@@ -1,0 +1,1 @@
+../../../../upstream/renderdoc/driver/metal/metal_types_bridge.h

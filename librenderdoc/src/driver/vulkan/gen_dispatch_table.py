@@ -1,0 +1,1 @@
+../../../../upstream/renderdoc/driver/vulkan/gen_dispatch_table.py

@@ -1,9 +1,7 @@
-: basics
+: version
 :
-$* 'World' >'Hello, World!'
+$* version >>~"/EOO/"
+/renderdoccmd .+ v1\.45 .*/
+/APIs supported at compile-time: .*/
 
-: missing-name
-:
-$* 2>>EOE != 0
-error: missing name
-EOE
+EOO

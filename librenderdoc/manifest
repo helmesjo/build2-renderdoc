@@ -28,6 +28,18 @@ depends: stb_image_resize2 ^2.18.0
 depends: stb_truetype ^1.26.0
 depends: libdirectx-headers ^1.619.5- ? \
   ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
+depends:
+\
+libmetal-cpp ^381.0.0-
+{
+  enable ($cxx.target.class == 'macos')
+
+  require
+  {
+    config.libmetal_cpp.implementation = true
+  }
+}
+\
 build-include: linux**-x86_64**
 build-include: macos**
 build-include: windows**-x86_64**

@@ -16,6 +16,9 @@ import impl_libs += libvulkan-loader%lib{vulkan} \
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
   import impl_libs += libdirectx-headers%liba{directx-headers}
 
+if ($cxx.target.class == 'macos')
+  import impl_libs += libmetal-cpp%lib{metal-cpp}
+
 out_pfx = [dir_path] $out_root/src/
 src_pfx = [dir_path] $src_root/src/
 
@@ -127,13 +130,13 @@ lib{renderdoc}: driver/ihv/arm/hxx{arm_counters} \
                 driver/ihv/arm/cxx{arm_counters_stub}: \
   include = $config.librenderdoc.gl
 
-# Metal (macOS). official/metal-cpp.* is upstream's amalgam (Integer as
-# int64_t, _MTL_OPTIONS as _NS_ENUM, Bundle/Data helpers). Packaged
-# libmetal-cpp 381 lacks those and collapses TypeName<>. Compile the amalgam
-# implementation TU rather than linking lib{metal-cpp}.
+# Metal (macOS). official/metal-cpp.h is a local shim over packaged
+# libmetal-cpp (enum remap plus Foundation helpers missing in 381).
 #
-lib{renderdoc}: driver/metal/{hxx cxx mm}{**}: \
+lib{renderdoc}: driver/metal/{hxx cxx mm}{** -official/metal-cpp}: \
   include = $config.librenderdoc.metal
+lib{renderdoc}: driver/metal/official/hxx{metal-cpp}: \
+  include = ($config.librenderdoc.metal ? adhoc : false)
 
 # OpenGL. Apple uses CGL, other POSIX uses GLX, Windows uses WGL.
 # GLES/EGL stay off here. Headers stay in the glob so dist ships

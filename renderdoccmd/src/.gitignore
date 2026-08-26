@@ -1,0 +1,5 @@
+renderdoccmd
+
+# Testscript output directory (can be symlink).
+#
+test-renderdoccmd

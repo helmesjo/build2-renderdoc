@@ -1,21 +1,26 @@
-# renderdoc - <SUMMARY>
+# renderdoc
 
-This is a `build2` package repository for [`renderdoc`](https://<UPSTREAM-URL>),
-a <SUMMARY-OF-FUNCTIONALITY>.
+This is a `build2` package repository for [RenderDoc](https://renderdoc.org),
+a frame-capture graphics debugger.
 
-This file contains setup instructions and other details that are more
-appropriate for development rather than consumption. If you want to use
-`renderdoc` in your `build2`-based project, then instead see the accompanying
-[`PACKAGE-README.md`](<PACKAGE>/PACKAGE-README.md) file.
+This file contains setup instructions that are more appropriate for
+development than consumption. If you want to use these packages in a
+`build2`-based project, see [`librenderdoc/PACKAGE-README.md`](librenderdoc/PACKAGE-README.md)
+and [`renderdoccmd/PACKAGE-README.md`](renderdoccmd/PACKAGE-README.md).
 
-The development setup for `renderdoc` uses the standard `bdep`-based workflow.
-For example:
+The development setup uses the standard `bdep`-based workflow. On macOS use
+Apple Clang or Homebrew LLVM, not Homebrew GCC. GCC cannot compile the
+Objective-C blocks in the macOS helpers.
 
 ```
-git clone .../renderdoc.git
+git clone --recursive https://github.com/build2-packaging/renderdoc.git
 cd renderdoc
 
-bdep init -C @gcc cc config.cxx=g++
+bdep init -C @apple cc config.cxx=clang++
 bdep update
 bdep test
 ```
+
+`bdep update @gcc` on macOS is expected to fail at configure with
+`librenderdoc requires Clang on macOS: GCC has no Objective-C blocks support`.
+Linux GCC remains a supported configuration in the package manifests.

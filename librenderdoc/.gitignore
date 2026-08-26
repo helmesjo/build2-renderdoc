@@ -34,3 +34,8 @@ compile_commands.json
 # Forwarded configuration convenience symlink for the host tool.
 #
 src/include-bin
+
+# include-bin generated C arrays (forwarded configuration).
+#
+src/data_*.c
+src/driver_vulkan_renderdoc_json.c

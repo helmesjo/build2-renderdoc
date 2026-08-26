@@ -1,6 +1,38 @@
-libs =
-#import libs += libhello%lib{hello}
+import libs = librenderdoc%lib{renderdoc}
 
-exe{renderdoccmd}: {hxx ixx txx cxx}{**} $libs testscript
+exe{renderdoccmd}: {hxx cxx}{renderdoccmd} 3rdparty/cmdline/hxx{cmdline} $libs testscript
+exe{renderdoccmd}: cxx{renderdoccmd_linux}: include = ($cxx.target.class == 'linux')
+exe{renderdoccmd}: cxx{renderdoccmd_apple}: include = ($cxx.target.class == 'macos')
+exe{renderdoccmd}: mm{apple/cocoa_window}: include = ($cxx.target.class == 'macos')
+exe{renderdoccmd}: cxx{renderdoccmd_win32}: include = ($cxx.target.class == 'windows')
 
-cxx.poptions =+ "-I$out_root" "-I$src_root"
+# Replay headers are the upstream api/ tree, symlinked into this package so
+# archive builds do not need a sibling librenderdoc source path.
+#
+# PYTHON_AVAILALBE is the upstream spelling.
+#
+# subdir=src: sources and the api/3rdparty overlays live in src_base, not src_root.
+#
+cxx.poptions += "-I$out_root" "-I$src_root" "-I$out_base" "-I$src_base" \
+                "-I$src_base/3rdparty" "-I$src_base/api" \
+                -DPYTHON_AVAILALBE=0
+
+cxx.poptions += -DRENDERDOC_SUPPORT_VULKAN
+
+switch $cxx.target.class
+{
+  case 'macos'
+  {
+    cxx.poptions += -DRENDERDOC_PLATFORM_APPLE -DRENDERDOC_SUPPORT_METAL \
+                    -DRENDERDOC_SUPPORT_GL
+    cxx.libs += -framework Cocoa -framework QuartzCore
+  }
+  case 'linux'
+  {
+    cxx.poptions += -DRENDERDOC_PLATFORM_LINUX -DRENDERDOC_SUPPORT_GL
+    cxx.libs += -lX11 -lxcb
+    cxx.loptions += "-Wl,--no-as-needed" -rdynamic
+  }
+  case 'windows'
+    cxx.poptions += -DRENDERDOC_PLATFORM_WIN32
+}

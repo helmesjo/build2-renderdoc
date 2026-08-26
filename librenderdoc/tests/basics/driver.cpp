@@ -1,34 +1,15 @@
-#include <sstream>
-#include <stdexcept>
+#include <renderdoc_app.h>
 
-#include <renderdoc.hpp>
+extern "C" int RENDERDOC_CC RENDERDOC_GetAPI (RENDERDOC_Version version,
+                                              void **outAPIPointers);
 
 #undef NDEBUG
 #include <cassert>
 
 int main ()
 {
-  using namespace std;
-  using namespace renderdoc;
-
-  // Basics.
-  //
-  {
-    ostringstream o;
-    say_hello (o, "World");
-    assert (o.str () == "Hello, World!\n");
-  }
-
-  // Empty name.
-  //
-  try
-  {
-    ostringstream o;
-    say_hello (o, "");
-    assert (false);
-  }
-  catch (const invalid_argument& e)
-  {
-    assert (e.what () == string ("empty name"));
-  }
+  void *api = nullptr;
+  int r = RENDERDOC_GetAPI (eRENDERDOC_API_Version_1_6_0, &api);
+  assert (r == 1);
+  assert (api != nullptr);
 }

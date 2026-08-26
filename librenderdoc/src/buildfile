@@ -1,29 +1,437 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
-#import xxxx_libs += libhello%lib{hello}
 
-lib{renderdoc}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+import impl_libs += libvulkan-loader%lib{vulkan} \
+                    libzstd%lib{zstd} \
+                    pugixml%lib{pugixml} \
+                    libminiz%lib{miniz} \
+                    libtinyexr%lib{tinyexr} \
+                    liblz4%lib{lz4} \
+                    stb_image%lib{stb_image} \
+                    stb_image_write%lib{stb_image_write} \
+                    stb_image_resize2%lib{stb_image_resize2} \
+                    stb_truetype%lib{stb_truetype}
 
-# Build options.
-#
+# MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
+if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
+  import impl_libs += libdirectx-headers%liba{directx-headers}
+
 out_pfx = [dir_path] $out_root/src/
 src_pfx = [dir_path] $src_root/src/
 
-cxx.poptions =+ "-I$out_pfx" "-I$src_pfx"
+macos = ($cxx.target.class == 'macos')
+linux = ($cxx.target.class == 'linux')
+windows = ($cxx.target.class == 'windows')
+posix = ($cxx.target.class != 'windows')
 
-#obja{*}: cxx.poptions += -DLIBRENDERDOC_STATIC_BUILD
-#objs{*}: cxx.poptions += -DLIBRENDERDOC_SHARED_BUILD
+./: lib{renderdoc}
 
-# Export options.
+# Core sources. Catch v1 unit-test TUs stay out of the lib.
+#
+lib{renderdoc}: {hxx txx cxx}{api/**} \
+                {hxx txx cxx}{common/** -**_tests} \
+                {hxx txx cxx}{core/** -**_tests} \
+                {hxx txx cxx}{android/**} \
+                {hxx txx cxx}{hooks/**} \
+                {hxx txx cxx}{maths/**} \
+                {hxx cxx}{os/os_specific} \
+                {hxx txx cxx}{replay/** -**_tests} \
+                {hxx txx cxx}{serialise/** -**_tests} \
+                {hxx cxx}{shaders/**} \
+                {hxx cxx}{strings/**} \
+                data/{hxx}{embedded_files glsl_shaders} \
+                3rdparty/jpeg-compressor/{hxx cxx}{*} \
+                3rdparty/md5/{hxx c}{*} \
+                3rdparty/superluminal/{hxx cxx}{*} \
+                3rdparty/tinyfiledialogs/{hxx c}{*} \
+                3rdparty/compressonator/{hxx cxx}{*} \
+                3rdparty/tinyexr/cxx{tinyexr} \
+                3rdparty/stb/c{stb_impl} \
+                3rdparty/catch/cxx{catch} \
+                $impl_libs $intf_libs
+
+lib{renderdoc}: 3rdparty/half/file{half.hpp}: include = adhoc
+lib{renderdoc}: 3rdparty/zstd/hxx{zstd}: include = adhoc
+lib{renderdoc}: 3rdparty/miniz/hxx{miniz}: include = adhoc
+lib{renderdoc}: 3rdparty/tinyexr/hxx{tinyexr}: include = adhoc
+lib{renderdoc}: 3rdparty/lz4/hxx{lz4}: include = adhoc
+lib{renderdoc}: 3rdparty/stb/hxx{stb_image stb_image_write stb_image_resize2 stb_truetype}: \
+  include = adhoc
+lib{renderdoc}: 3rdparty/pugixml/file{pugixml.hpp}: include = adhoc
+lib{renderdoc}: data/cxx{glsl_shaders}: \
+  include = ($config.librenderdoc.vulkan || $config.librenderdoc.gl)
+
+# POSIX / Win32 OS backends.
+#
+lib{renderdoc}: os/posix/apple/{cxx mm}{*}: include = $macos
+lib{renderdoc}: os/posix/cxx{posix_network \
+                             posix_process \
+                             posix_stringio \
+                             posix_threading}: \
+  include = $posix
+lib{renderdoc}: os/posix/hxx{posix_network posix_specific}: include = $posix
+lib{renderdoc}: os/posix/linux/cxx{*}: include = $linux
+lib{renderdoc}: os/win32/{hxx cxx}{*}: include = $windows
+lib{renderdoc}: 3rdparty/plthook/{hxx c}{*}: include = $linux
+
+# posix_libentry is its own static archive, whole-linked into the shared
+# library so library_loaded() runs after other static constructors (CMake
+# renderdoc_libentry + Apple -force_load). Nested liba{} is not an archive
+# input, so the static variant lists the source directly.
+#
+liba{renderdoc_libentry}: os/posix/cxx{posix_libentry}: include = $posix
+liba{renderdoc_libentry}:
+{
+  install = false
+}
+
+libs{renderdoc}: liba{renderdoc_libentry}:
+{
+  bin.whole = true
+  include = $posix
+}
+
+liba{renderdoc}: os/posix/cxx{posix_libentry}: include = $posix
+
+# Vulkan driver.
+#
+lib{renderdoc}: driver/vulkan/{hxx txx cxx}{** \
+                      -**_tests \
+                      -vk_android -vk_layer_android \
+                      -vk_win32 -vk_linux -vk_apple -vk_posix}: \
+  include = $config.librenderdoc.vulkan
+lib{renderdoc}: driver/vulkan/cxx{vk_posix}: \
+  include = ($config.librenderdoc.vulkan && $posix)
+lib{renderdoc}: driver/vulkan/cxx{vk_linux}: \
+  include = ($config.librenderdoc.vulkan && $linux)
+lib{renderdoc}: driver/vulkan/cxx{vk_apple}: \
+  include = ($config.librenderdoc.vulkan && $macos)
+lib{renderdoc}: driver/vulkan/mm{vk_apple_helpers}: \
+  include = ($config.librenderdoc.vulkan && $macos)
+lib{renderdoc}: driver/vulkan/cxx{vk_win32}: \
+  include = ($config.librenderdoc.vulkan && $windows)
+lib{renderdoc}: driver/vulkan/official/hxx{*}: \
+  include = ($config.librenderdoc.vulkan ? adhoc : false)
+
+# SPIR-V + vendored glslang (no build2 package yet).
+#
+lib{renderdoc}: driver/shaders/spirv/{hxx cxx}{**} \
+                 3rdparty/glslang/{hxx cxx}{** \
+                   -glslang/OSDependent/Unix/** \
+                   -glslang/OSDependent/Windows/**}: \
+  include = ($config.librenderdoc.vulkan || $config.librenderdoc.gl)
+lib{renderdoc}: 3rdparty/glslang/glslang/OSDependent/Unix/cxx{ossource}: \
+  include = (($config.librenderdoc.vulkan || $config.librenderdoc.gl) && $posix)
+lib{renderdoc}: 3rdparty/glslang/glslang/OSDependent/Windows/cxx{ossource}: \
+  include = (($config.librenderdoc.vulkan || $config.librenderdoc.gl) && $windows)
+
+# AMD IHV is unconditional. NVIDIA Aftermath follows GL/Vulkan. Extra NV
+# counter TUs match CMake (not Android, not Apple).
+#
+lib{renderdoc}: driver/ihv/amd/{hxx cxx}{amd_counters amd_isa amd_isa_devices amd_rgp} \
+                driver/ihv/amd/hxx{official/RGP/DevDriverAPI}
+lib{renderdoc}: driver/ihv/amd/cxx{amd_isa_posix}: include = $posix
+lib{renderdoc}: driver/ihv/amd/cxx{amd_isa_win32 amd_hooks}: include = $windows
+lib{renderdoc}: driver/ihv/amd/{hxx cxx}{ags_wrapper}: include = $windows
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_aftermath}: \
+  include = ($config.librenderdoc.vulkan || $config.librenderdoc.gl)
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_counter_enumerator}: include = $linux
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_vk_counters}: \
+  include = ($linux && $config.librenderdoc.vulkan)
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_gl_counters}: \
+  include = ($linux && $config.librenderdoc.gl)
+lib{renderdoc}: driver/ihv/intel/{hxx cxx}{intel_gl_counters}: \
+  include = $config.librenderdoc.gl
+lib{renderdoc}: driver/ihv/arm/hxx{arm_counters} \
+                driver/ihv/arm/cxx{arm_counters_stub}: \
+  include = $config.librenderdoc.gl
+
+# Metal (macOS). official/metal-cpp.* is upstream's amalgam (Integer as
+# int64_t, _MTL_OPTIONS as _NS_ENUM, Bundle/Data helpers). Packaged
+# libmetal-cpp 381 lacks those and collapses TypeName<>. Compile the amalgam
+# implementation TU rather than linking lib{metal-cpp}.
+#
+lib{renderdoc}: driver/metal/{hxx cxx mm}{**}: \
+  include = $config.librenderdoc.metal
+
+# OpenGL. Apple uses CGL, other POSIX uses GLX, Windows uses WGL.
+# GLES/EGL stay off here. Headers stay in the glob so dist ships
+# apple_gl_hook_defs.h (included by gl_hooks.cpp on every platform).
+# precompiled.cpp is MSVC PCH only.
+#
+lib{renderdoc}: driver/gl/{hxx}{**}: include = $config.librenderdoc.gl
+lib{renderdoc}: driver/gl/{cxx}{** \
+                    -apple_gl_hook_defs -cgl_platform -cgl_hooks \
+                    -glx_platform -glx_hooks -glx_fake_vk_hooks \
+                    -egl_platform -egl_hooks \
+                    -wgl_platform -wgl_hooks \
+                    -precompiled}: \
+  include = $config.librenderdoc.gl
+lib{renderdoc}: driver/gl/hxx{apple_gl_hook_defs} \
+                driver/gl/cxx{apple_gl_hook_defs cgl_platform cgl_hooks} \
+                driver/gl/mm{cgl_platform_helpers}: \
+  include = ($config.librenderdoc.gl && $macos)
+lib{renderdoc}: driver/gl/cxx{glx_platform glx_hooks glx_fake_vk_hooks}: \
+  include = ($config.librenderdoc.gl && $linux)
+lib{renderdoc}: driver/gl/cxx{wgl_platform wgl_hooks}: \
+  include = ($config.librenderdoc.gl && $windows)
+
+# D3D11 / D3D12 / DXGI (Windows).
+#
+lib{renderdoc}: driver/d3d11/{hxx cxx}{**} \
+                driver/d3d12/{hxx cxx}{**} \
+                driver/dxgi/{hxx cxx}{**} \
+                driver/dx/{hxx}{**} \
+                driver/shaders/dxbc/{hxx cxx}{**} \
+                driver/shaders/dxil/{hxx cxx}{**}: \
+  include = ($config.librenderdoc.d3d11 || $config.librenderdoc.d3d12)
+
+# include-bin: host tool that turns data files into C arrays. Not installed.
+# Declared here (package src/), not under the 3rdparty/include-bin symlink.
+#
+exe{include-bin}: cxx{3rdparty/include-bin/main}
+exe{include-bin}:
+{
+  dist = false
+  install = false
+  test = false
+}
+
+# dist = false on the exe would otherwise drop main.cpp from the archive.
+#
+lib{renderdoc}: cxx{3rdparty/include-bin/main}: include = adhoc
+
+embed_files = \
+  data/sourcecodepro.ttf \
+  data/glsl/blit.vert \
+  data/glsl/checkerboard.frag \
+  data/glsl/texdisplay.frag \
+  data/glsl/gltext.vert \
+  data/glsl/gltext.frag \
+  data/glsl/vktext.vert \
+  data/glsl/vktext.frag \
+  data/glsl/fixedcol.frag \
+  data/glsl/mesh.vert \
+  data/glsl/mesh.geom \
+  data/glsl/mesh.frag \
+  data/glsl/trisize.geom \
+  data/glsl/trisize.frag \
+  data/glsl/minmaxtile.comp \
+  data/glsl/minmaxresult.comp \
+  data/glsl/histogram.comp \
+  data/glsl/glsl_globals.h \
+  data/glsl/glsl_ubos.h \
+  data/glsl/gl_texsample.h \
+  data/glsl/vk_texsample.h \
+  data/glsl/quadresolve.frag \
+  data/glsl/quadwrite.frag \
+  data/glsl/mesh.comp \
+  data/glsl/array2ms.comp \
+  data/glsl/ms2array.comp \
+  data/glsl/deptharr2ms.frag \
+  data/glsl/depthms2arr.frag \
+  data/glsl/gles_texsample.h \
+  data/glsl/pixelhistory_mscopy.comp \
+  data/glsl/pixelhistory_mscopy_depth.comp \
+  data/glsl/pixelhistory_primid.frag \
+  data/glsl/shaderdebug_sample.vert \
+  data/glsl/texremap.frag \
+  data/glsl/discard.frag \
+  data/glsl/vk_ms2buffer.comp \
+  data/glsl/vk_depthms2buffer.comp \
+  data/glsl/vk_buffer2ms.comp \
+  data/glsl/vk_depthbuf2ms.frag \
+  data/glsl/depth_copy.frag \
+  data/glsl/depth_copyms.frag \
+  data/glsl/debug_math.comp \
+  data/glsl/debug_sample.frag \
+  data/hlsl/quadswizzle.hlsl \
+  driver/vulkan/renderdoc.json
+
+for f: $embed_files
+{
+  n = $regex.replace($f, '[^A-Za-z0-9]', '_')
+
+  c{$n}: file{$f} exe{include-bin}
+  {{
+    diag include-bin $>
+    rel = $posix_string($relative($path($<[0]), $src_base))
+    cd $src_base
+    $path($<[1]) $rel $path($>)
+  }}
+
+  lib{renderdoc}: c{$n}
+}
+
+# GIT_COMMIT_HASH is a compile define, not a checked-in hash.
+#
+obj{replay/version}: \
+  cxx.poptions += "-DGIT_COMMIT_HASH=\"$version.project_id\""
+
+# Build options.
+#
+# -I.../3rdparty first so "pugixml/pugixml.hpp" hits the shim, then
+# #include_next reaches the packaged header. Private paths only, never export.
+#
+cc.poptions  =+ "-I$out_pfx" "-I$src_pfx/3rdparty" "-I$src_pfx"
+cxx.poptions =+ "-I$out_pfx" "-I$src_pfx/3rdparty" "-I$src_pfx"
+c.poptions   =+ "-I$out_pfx" "-I$src_pfx/3rdparty" "-I$src_pfx"
+
+cc.poptions += -DRDOC_BASE_NAME=renderdoc -DRENDERDOC_EXPORTS -DRELEASE
+
+if $config.librenderdoc.vulkan
+  cc.poptions += -DRENDERDOC_SUPPORT_VULKAN -DVK_ENABLE_BETA_EXTENSIONS
+
+if $config.librenderdoc.gl
+  cc.poptions += -DRENDERDOC_SUPPORT_GL
+
+if $config.librenderdoc.metal
+  cc.poptions += -DRENDERDOC_SUPPORT_METAL
+
+switch $cxx.target.class
+{
+  case 'macos'
+    cc.poptions += -DRENDERDOC_PLATFORM_APPLE
+  case 'linux'
+    cc.poptions += -DRENDERDOC_PLATFORM_LINUX \
+                   -DRENDERDOC_WINDOWING_XLIB -DRENDERDOC_WINDOWING_XCB \
+                   -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT \
+                   -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_WIN32_KHR
+  case 'windows'
+    cc.poptions += -DRENDERDOC_PLATFORM_WIN32 -DVK_USE_PLATFORM_WIN32_KHR
+}
+
+if $macos
+  cxx.poptions += -DVK_USE_PLATFORM_MACOS_MVK -DVK_USE_PLATFORM_METAL_EXT
+
+obj{driver/shaders/spirv/** 3rdparty/glslang/**}:
+{
+  cxx.poptions += "-I$src_pfx/3rdparty/glslang" -DAMD_EXTENSIONS -DNV_EXTENSIONS
+}
+
+obj{driver/ihv/nv/**}:
+{
+  cxx.poptions += \
+    "-I$src_pfx/driver/ihv/nv/official/PerfSDK/redist/include" \
+    "-I$src_pfx/driver/ihv/nv/official/PerfSDK/redist/NvPerfUtility/include"
+}
+
+# Match upstream: -fno-strict-aliasing, hidden visibility. No -Wall / -Werror.
+#
+if ($cxx.class == 'gcc')
+{
+  cc.coptions += -fno-strict-aliasing -fvisibility=hidden
+  cxx.coptions += -fvisibility-inlines-hidden
+}
+
+obj{3rdparty/glslang/**}: cxx.coptions += \
+  -Wno-ignored-qualifiers -Wno-strict-aliasing -Wno-unused-parameter \
+  -Wno-unused-variable -Wno-reorder -Wno-sign-compare
+
+obj{3rdparty/compressonator/**}: cxx.coptions += \
+  -Wno-missing-braces -Wno-char-subscripts -Wno-sign-compare \
+  -Wno-unused-value -Wno-strict-aliasing -Wno-implicit-fallthrough
+
+if $posix
+  obj{3rdparty/compressonator/**}: cxx.poptions += -D_LINUX
+
+obj{3rdparty/jpeg-compressor/**}: cxx.coptions += \
+  -Wno-unknown-warning-option -Wno-shift-negative-value -Wno-invalid-noreturn
+
+# System libraries.
+#
+switch $cxx.target.class
+{
+  case 'macos'
+  {
+    cxx.libs += -framework Cocoa -framework QuartzCore -liconv -ldl -pthread
+    if $config.librenderdoc.metal
+      cxx.libs += -framework Metal
+    if $config.librenderdoc.gl
+      cxx.libs += -framework OpenGL
+  }
+  case 'linux'
+  {
+    cxx.libs += -ldl -lm -lrt -lX11 -lxcb -lxcb-keysyms -pthread
+    if $config.librenderdoc.gl
+      cxx.libs += -lGL
+  }
+  case 'windows'
+  {
+    if ($cxx.target.system == 'mingw32')
+      cxx.libs += -ld3d11 -ldxgi -luser32 -lgdi32
+    else
+      cxx.libs += d3d11.lib dxgi.lib user32.lib gdi32.lib
+  }
+}
+
+if $linux
+{
+  libs{renderdoc}: file{renderdoc.version}: include = adhoc
+  libs{renderdoc}: cxx.loptions += \
+    "-Wl,--undefined,force_include_libentry" \
+    "-Wl,--version-script,$src_base/renderdoc.version" \
+    "-Wl,--no-undefined"
+}
+
+# Vulkan implicit-layer json (MoltenVK ICD pattern, adjusted for a layer).
+#
+in.symbol = '@'
+in.mode = lax
+shared = ($bin.lib != 'static')
+
+# Trailing dot: the template is renderdoc.json, not renderdoc.json.in.
+
+if $version.pre_release
+  ver_sfx = "-$version.project_id"
+else
+  ver_sfx = "-$version.major.$version.minor"
+
+lib_leaf = ($macos   ? "librenderdoc$ver_sfx.dylib" : \
+            $windows ? "renderdoc$ver_sfx.dll"      : \
+                       "librenderdoc$ver_sfx.so")
+
+json{renderdoc_capture}: driver/vulkan/in{renderdoc.json.}
+json{renderdoc_capture}:
+{
+  VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture
+  VULKAN_ENABLE_VAR = ENABLE_VULKAN_RENDERDOC_CAPTURE
+  RENDERDOC_VERSION_MAJOR = $version.major
+  RENDERDOC_VERSION_MINOR = $version.minor
+  VULKAN_LAYER_MODULE_PATH = $lib_leaf
+  install = false
+  dist = false
+}
+
+layer_etcdir = ($install.root != [null] \
+  ? $install.resolve([dir_path] etc/vulkan/implicit_layer.d/, [dir_path]) \
+  : [dir_path] '/unconfigured')
+layer_libdir = ($install.root != [null] \
+  ? $install.resolve($install.lib, $layer_etcdir) \
+  : [dir_path] '/unconfigured')
+
+json{renderdoc_capture-install}: driver/vulkan/in{renderdoc.json.}
+json{renderdoc_capture-install}:
+{
+  VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture
+  VULKAN_ENABLE_VAR = ENABLE_VULKAN_RENDERDOC_CAPTURE
+  RENDERDOC_VERSION_MAJOR = $version.major
+  RENDERDOC_VERSION_MINOR = $version.minor
+  VULKAN_LAYER_MODULE_PATH = $posix_string([path] $layer_libdir/$lib_leaf)
+  install = etc/vulkan/implicit_layer.d/renderdoc_capture.json
+  dist = false
+}
+
+./: json{renderdoc_capture} json{renderdoc_capture-install}: \
+  include = ($shared && !$windows)
+
+# Export options. Consumers include <renderdoc_app.h>.
 #
 lib{renderdoc}:
 {
-  cxx.export.poptions = "-I$out_pfx" "-I$src_pfx"
+  cxx.export.poptions = "-I$src_pfx/api/app"
   cxx.export.libs = $intf_libs
 }
-
-#liba{renderdoc}: cxx.export.poptions += -DLIBRENDERDOC_STATIC
-#libs{renderdoc}: cxx.export.poptions += -DLIBRENDERDOC_SHARED
 
 # For pre-releases use the complete version to make sure they cannot
 # be used in place of another pre-release or the final version. See
@@ -34,10 +442,11 @@ if $version.pre_release
 else
   lib{renderdoc}: bin.lib.version = "-$version.major.$version.minor"
 
-# Install recreating subdirectories.
+# Install only the public in-application API header, as CMake does.
 #
-{hxx ixx txx}{*}:
+{hxx ixx txx}{*}: install = false
+api/app/hxx{renderdoc_app}@api/app/:
 {
   install         = include/
-  install.subdirs = true
+  install.subdirs = false
 }

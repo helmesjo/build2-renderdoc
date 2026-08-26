@@ -1,15 +1,68 @@
 : 1
 name: librenderdoc
-version: 0.1.0-a.0.z
+version: 1.45.0-a.0.z
 language: c++
-project: build2-renderdoc
-summary: renderdoc C++ library
-license: MIT ; MIT License.
+project: renderdoc
+summary: Frame-capture graphics debugger C++ library
+license: MIT
+topics: graphics, debugger, vulkan, metal, directx
 description-file: README.md
 package-description-file: PACKAGE-README.md
-url: https://example.org/upstream
-email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-renderdoc
+url: https://renderdoc.org
+email: baldurk@baldurk.org
+doc-url: https://renderdoc.org/docs
+src-url: https://github.com/baldurk/renderdoc
+package-url: https://github.com/build2-packaging/renderdoc
 package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
+depends: libvulkan-headers ^1.4.359
+depends: libzstd ^1.5.5
+depends: pugixml ^1.12.1
+depends: libminiz ^3.0.2
+depends: libtinyexr ^1.0.8
+depends: liblz4 ^1.9.3
+depends: stb_image ^2.30.0
+depends: stb_image_write ^1.16.0
+depends: stb_image_resize2 ^2.18.0
+depends: stb_truetype ^1.26.0
+depends: libjpeg-compressor ^1.0.5
+depends: libtinyfiledialogs ^3.21.4
+depends: libhalf ^2.2.0
+depends: libcmp-core ^4.5.52
+depends: libglslang ^16.5.0
+depends: libopengl-registry ~2026.8.3 ? ($config.librenderdoc.gl)
+depends: libegl-registry ~2026.3.19 ? ($config.librenderdoc.gl)
+depends: libplthook ^0.0.1 ? ($cxx.target.class == 'linux')
+depends: libdirectx-headers ^1.619.5 ? \
+  ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
+depends: libgpuopen-gpuperfapi-headers ^4.4.103
+depends: libgpuopen-amddxgsa ^2.15.0
+depends: libgpuopen-devdriverapi-headers ^1.7.0
+depends: libnvperf ^2026.3.0 ? \
+  ($cxx.target.cpu == 'x86_64' && \
+   ($cxx.target.class == 'linux' || $cxx.target.class == 'windows'))
+depends: libnvapi ^615.0.0 ? ($cxx.target.class == 'windows')
+depends: libgpuopen-ags-headers ^6.3.1 ? ($cxx.target.class == 'windows')
+depends: libgpuopen-amddxext ^4.4.103 ? ($cxx.target.class == 'windows')
+depends: libmetrics-discovery-headers ^1.16.197 ? \
+  ($cxx.target.class == 'windows')
+depends: libmicrosoft-pdb >= 2023.4.27 ? \
+  ($config.librenderdoc.d3d11 || $config.librenderdoc.d3d12)
+depends:
+\
+libmetal-cpp ^381.0.0
+{
+  enable ($cxx.target.class == 'macos')
+
+  require
+  {
+    config.libmetal_cpp.implementation = true
+  }
+}
+\
+builds: -( +windows &gcc ) ; Upstream Windows is Visual Studio only.
+builds: -( +windows &static ) ; Capture injects renderdoc.dll, so Windows is shared only.
+build-include: macos**
+build-exclude: macos**-gcc** ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
+build-exclude: ** ; Downloads the large pre-built SDK archive from NVIDIA.

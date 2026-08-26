@@ -1,1 +1,0 @@
-../../../../upstream/renderdoc/3rdparty/tinyexr/tinyexr.cpp

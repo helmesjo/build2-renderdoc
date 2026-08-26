@@ -2,15 +2,43 @@
 #
 #cxx.internal.scope = current
 
-cxx.std = latest
+# Upstream is C++14 (Metal C++17). latest is C++26 here and rejects PointerVal brace-init.
+cxx.std = 17
 
+using c
 using cxx
+using cxx.objcxx
+using in
 
-hxx{*}: extension = hpp
+# RenderDoc compiles Objective-C++ that uses Apple's blocks extension
+# (apple_helpers.mm, vk_apple_helpers.mm). GCC cannot parse that, same as
+# metal-cpp.
+#
+if ($cxx.target.class == 'macos' && $cc.id == 'gcc')
+  fail 'librenderdoc requires Clang on macOS: GCC has no Objective-C blocks support'
+
+hxx{*}: extension = h
 ixx{*}: extension = ipp
-txx{*}: extension = tpp
+txx{*}: extension = inl
 cxx{*}: extension = cpp
 
 # The test target for cross-testing (running tests under Wine, etc).
 #
 test.target = $cxx.target
+
+# Graphics API selection. Vulkan is the portable default. GL matches
+# upstream ENABLE_GL (on except Windows). Metal and D3D follow the host.
+#
+config [bool] config.librenderdoc.vulkan ?= true
+config [bool] config.librenderdoc.gl     ?= ($cxx.target.class != 'windows')
+config [bool] config.librenderdoc.metal  ?= ($cxx.target.class == 'macos')
+config [bool] config.librenderdoc.d3d11  ?= ($cxx.target.class == 'windows')
+config [bool] config.librenderdoc.d3d12  ?= ($cxx.target.class == 'windows')
+
+if $config.librenderdoc.metal
+  assert ($cxx.target.class == 'macos') \
+    'config.librenderdoc.metal requires macOS'
+
+if ($config.librenderdoc.d3d11 || $config.librenderdoc.d3d12)
+  assert ($cxx.target.class == 'windows') \
+    'config.librenderdoc.d3d11/d3d12 require Windows'

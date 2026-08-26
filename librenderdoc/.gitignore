@@ -30,3 +30,7 @@
 # Compilation database.
 #
 compile_commands.json
+
+# Forwarded configuration convenience symlink for the host tool.
+#
+src/include-bin

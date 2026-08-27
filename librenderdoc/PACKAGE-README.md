@@ -2,7 +2,9 @@
 
 This is a `build2` package for the [RenderDoc](https://renderdoc.org) C++
 library. It captures frames from Vulkan, OpenGL, Metal, D3D11, and D3D12
-applications and exposes the in-application API through `<renderdoc_app.h>`.
+applications. Linking against `lib{renderdoc}` also transitively imports
+`lib{renderdoc-app}` so consumers get `<renderdoc_app.h>` without a separate
+`depends:` entry.
 
 
 ## Usage
@@ -20,7 +22,9 @@ Then import the library in your `buildfile`:
 import libs = librenderdoc%lib{renderdoc}
 ```
 
-Include the public header as `<renderdoc_app.h>` and call `RENDERDOC_GetAPI`.
+Include the public header as `<renderdoc_app.h>`. The header typedefs
+`pRENDERDOC_GetAPI` and does not declare `RENDERDOC_GetAPI`. Linking
+consumers that want the exported symbol must declare it themselves.
 
 
 ## Importable targets
@@ -29,8 +33,11 @@ Include the public header as `<renderdoc_app.h>` and call `RENDERDOC_GetAPI`.
 lib{renderdoc}
 ```
 
-The capture/replay library. Only `renderdoc_app.h` is installed. Replay
-headers stay private, matching upstream CMake.
+The capture/replay library. Replay headers stay private, matching upstream
+CMake. The public in-application API header is installed by `librenderdoc-app`.
+A final release uses unversioned names matching upstream CMake (`librenderdoc.so`,
+`librenderdoc.dylib`, `renderdoc.dll`) so the in-application API can find this
+module by those names.
 
 On macOS the compiler must be Clang. GCC cannot parse the Objective-C blocks
 used in `apple_helpers.mm` and the Metal/GL helpers (the same limitation as

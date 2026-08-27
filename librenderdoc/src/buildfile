@@ -10,7 +10,8 @@ import impl_libs += libvulkan-loader%lib{vulkan} \
                     stb_image%lib{stb_image} \
                     stb_image_write%lib{stb_image_write} \
                     stb_image_resize2%lib{stb_image_resize2} \
-                    stb_truetype%lib{stb_truetype}
+                    stb_truetype%lib{stb_truetype} \
+                    libjpeg-compressor%lib{jpeg-compressor}
 
 # MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
@@ -43,7 +44,6 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
                 {hxx cxx}{shaders/**} \
                 {hxx cxx}{strings/**} \
                 data/{hxx}{embedded_files glsl_shaders} \
-                3rdparty/jpeg-compressor/{hxx cxx}{*} \
                 3rdparty/md5/{hxx c}{*} \
                 3rdparty/superluminal/{hxx cxx}{*} \
                 3rdparty/tinyfiledialogs/{hxx c}{*} \
@@ -353,9 +353,6 @@ obj{3rdparty/compressonator/**}: cxx.coptions += \
 
 if $posix
   obj{3rdparty/compressonator/**}: cxx.poptions += -D_LINUX
-
-obj{3rdparty/jpeg-compressor/**}: cxx.coptions += \
-  -Wno-unknown-warning-option -Wno-shift-negative-value -Wno-invalid-noreturn
 
 # System libraries.
 #

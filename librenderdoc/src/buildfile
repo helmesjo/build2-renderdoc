@@ -13,7 +13,8 @@ import impl_libs += libvulkan-loader%lib{vulkan} \
                     stb_truetype%lib{stb_truetype} \
                     libjpeg-compressor%lib{jpeg-compressor} \
                     libtinyfiledialogs%lib{tinyfiledialogs} \
-                    libhalf%lib{half}
+                    libhalf%lib{half} \
+                    libcmp-core%lib{CMP_Core}
 
 # MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
@@ -51,13 +52,13 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
                 data/{hxx}{embedded_files glsl_shaders} \
                 3rdparty/md5/{hxx c}{*} \
                 3rdparty/superluminal/{hxx cxx}{*} \
-                3rdparty/compressonator/{hxx cxx}{*} \
                 3rdparty/tinyexr/cxx{tinyexr_impl} \
                 3rdparty/stb/c{stb_impl} \
                 3rdparty/catch/cxx{catch_stub} \
                 $impl_libs $intf_libs
 
 lib{renderdoc}: 3rdparty/half/file{half.hpp}: include = adhoc
+lib{renderdoc}: 3rdparty/compressonator/hxx{CMP_Core}: include = adhoc
 lib{renderdoc}: 3rdparty/zstd/hxx{zstd}: include = adhoc
 lib{renderdoc}: 3rdparty/miniz/hxx{miniz}: include = adhoc
 lib{renderdoc}: 3rdparty/tinyexr/hxx{tinyexr}: include = adhoc
@@ -350,13 +351,6 @@ if ($cxx.class == 'gcc')
 obj{3rdparty/glslang/**}: cxx.coptions += \
   -Wno-ignored-qualifiers -Wno-strict-aliasing -Wno-unused-parameter \
   -Wno-unused-variable -Wno-reorder -Wno-sign-compare
-
-obj{3rdparty/compressonator/**}: cxx.coptions += \
-  -Wno-missing-braces -Wno-char-subscripts -Wno-sign-compare \
-  -Wno-unused-value -Wno-strict-aliasing -Wno-implicit-fallthrough
-
-if $posix
-  obj{3rdparty/compressonator/**}: cxx.poptions += -D_LINUX
 
 # System libraries.
 #

@@ -1,0 +1,3 @@
+import libs = librenderdoc-app%lib{renderdoc-app}
+
+exe{driver}: {h c}{**} $libs testscript{**}

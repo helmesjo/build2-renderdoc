@@ -14,7 +14,9 @@ import impl_libs += libvulkan-loader%lib{vulkan} \
                     libjpeg-compressor%lib{jpeg-compressor} \
                     libtinyfiledialogs%lib{tinyfiledialogs} \
                     libhalf%lib{half} \
-                    libcmp-core%lib{CMP_Core}
+                    libcmp-core%lib{CMP_Core} \
+                    libglslang%lib{glslang} \
+                    libglslang%lib{glslang-default-resource-limits}
 
 # MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
@@ -59,6 +61,8 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
 
 lib{renderdoc}: 3rdparty/half/file{half.hpp}: include = adhoc
 lib{renderdoc}: 3rdparty/compressonator/hxx{CMP_Core}: include = adhoc
+lib{renderdoc}: 3rdparty/glslang/glslang/Public/hxx{ShaderLang ResourceLimits}: include = adhoc
+lib{renderdoc}: 3rdparty/glslang/glslang/Include/hxx{Types}: include = adhoc
 lib{renderdoc}: 3rdparty/zstd/hxx{zstd}: include = adhoc
 lib{renderdoc}: 3rdparty/miniz/hxx{miniz}: include = adhoc
 lib{renderdoc}: 3rdparty/tinyexr/hxx{tinyexr}: include = adhoc
@@ -102,17 +106,10 @@ lib{renderdoc}: driver/vulkan/cxx{vk_win32}: \
 lib{renderdoc}: driver/vulkan/official/hxx{*}: \
   include = ($config.librenderdoc.vulkan ? adhoc : false)
 
-# SPIR-V + vendored glslang (no build2 package yet).
+# SPIR-V (packaged libglslang).
 #
-lib{renderdoc}: driver/shaders/spirv/{hxx cxx}{**} \
-                 3rdparty/glslang/{hxx cxx}{** \
-                   -glslang/OSDependent/Unix/** \
-                   -glslang/OSDependent/Windows/**}: \
+lib{renderdoc}: driver/shaders/spirv/{hxx cxx}{**}: \
   include = ($config.librenderdoc.vulkan || $config.librenderdoc.gl)
-lib{renderdoc}: 3rdparty/glslang/glslang/OSDependent/Unix/cxx{ossource}: \
-  include = (($config.librenderdoc.vulkan || $config.librenderdoc.gl) && $posix)
-lib{renderdoc}: 3rdparty/glslang/glslang/OSDependent/Windows/cxx{ossource}: \
-  include = (($config.librenderdoc.vulkan || $config.librenderdoc.gl) && $windows)
 
 # AMD IHV is unconditional. NVIDIA Aftermath follows GL/Vulkan. Extra NV
 # counter TUs match CMake (not Android, not Apple).
@@ -264,13 +261,12 @@ c{driver_vulkan_renderdoc_json}: driver/vulkan/in{renderdoc.json.} exe{include-b
 lib{renderdoc}: c{driver_vulkan_renderdoc_json}
 
 # Headers included from sources but not matched by the compiled hxx globs
-# (data/glsl extras, glslang .hpp11, IHV vendor trees). Dist needs them.
+# (data/glsl extras, IHV vendor trees). Dist needs them.
 #
 lib{renderdoc}: data/hxx{resource} \
                 data/glsl/hxx{glsl_ubos_cpp} \
                 data/hlsl/hxx{hlsl_texsample hlsl_custom_prefix hlsl_cbuffers}: \
   include = adhoc
-lib{renderdoc}: 3rdparty/glslang/SPIRV/file{spirv.hpp11}: include = adhoc
 lib{renderdoc}: driver/ihv/amd/hxx{official/**}: include = adhoc
 lib{renderdoc}: driver/ihv/nv/hxx{official/**}: include = adhoc
 lib{renderdoc}: driver/ihv/intel/hxx{official/**}: include = adhoc
@@ -328,11 +324,6 @@ switch $cxx.target.class
 if $macos
   cxx.poptions += -DVK_USE_PLATFORM_MACOS_MVK -DVK_USE_PLATFORM_METAL_EXT
 
-obj{driver/shaders/spirv/** 3rdparty/glslang/**}:
-{
-  cxx.poptions += "-I$src_pfx/3rdparty/glslang" -DAMD_EXTENSIONS -DNV_EXTENSIONS
-}
-
 obj{driver/ihv/nv/**}:
 {
   cxx.poptions += \
@@ -347,10 +338,6 @@ if ($cxx.class == 'gcc')
   cc.coptions += -fno-strict-aliasing -fvisibility=hidden
   cxx.coptions += -fvisibility-inlines-hidden
 }
-
-obj{3rdparty/glslang/**}: cxx.coptions += \
-  -Wno-ignored-qualifiers -Wno-strict-aliasing -Wno-unused-parameter \
-  -Wno-unused-variable -Wno-reorder -Wno-sign-compare
 
 # System libraries.
 #

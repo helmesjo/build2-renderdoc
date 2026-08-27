@@ -16,6 +16,7 @@ package-url: https://github.com/build2-packaging/renderdoc
 package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
+depends: librenderdoc-app == $
 depends: libvulkan-loader ^1.4.359-
 depends: libzstd ^1.5.5
 depends: pugixml ^1.12.1

@@ -1,6 +1,10 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
+# Public in-application API is the sibling binless package.
+#
+import intf_libs = librenderdoc-app%lib{renderdoc-app}
+
 import impl_libs += libvulkan-loader%lib{vulkan} \
                     libzstd%lib{zstd} \
                     pugixml%lib{pugixml} \
@@ -383,14 +387,21 @@ shared = ($bin.lib != 'static')
 
 # Trailing dot: the template is renderdoc.json, not renderdoc.json.in.
 
+# Same suffix as bin.lib.version below. Final releases are unversioned
+# (upstream CMake sets no SOVERSION). Pre-releases keep the snapshot
+# suffix so they cannot substitute for a final.
+#
 if $version.pre_release
   ver_sfx = "-$version.project_id"
 else
-  ver_sfx = "-$version.major.$version.minor"
+  ver_sfx = ""
 
-lib_leaf = ($macos   ? "librenderdoc$ver_sfx.dylib" : \
-            $windows ? "renderdoc$ver_sfx.dll"      : \
-                       "librenderdoc$ver_sfx.so")
+# Adjacent quotes terminate $ver_sfx. A single string like
+# "librenderdoc$ver_sfx.dylib" would look up ver_sfx.dylib.
+#
+lib_leaf = ($macos   ? "librenderdoc$ver_sfx"".dylib" : \
+            $windows ? "renderdoc$ver_sfx"".dll"      : \
+                       "librenderdoc$ver_sfx"".so")
 
 json{renderdoc_capture}: driver/vulkan/in{renderdoc.json.}
 json{renderdoc_capture}:
@@ -426,11 +437,10 @@ json{renderdoc_capture-install}:
 ./: json{renderdoc_capture} json{renderdoc_capture-install}: \
   include = ($shared && !$windows)
 
-# Export options. Consumers include <renderdoc_app.h>.
+# Export options. Consumers include <renderdoc_app.h> via librenderdoc-app.
 #
 lib{renderdoc}:
 {
-  cxx.export.poptions = "-I$src_pfx/api/app"
   cxx.export.libs = $intf_libs
 }
 
@@ -438,16 +448,15 @@ lib{renderdoc}:
 # be used in place of another pre-release or the final version. See
 # the version module for details on the version.* variable values.
 #
+# A final release uses unversioned names matching upstream CMake
+# (no SOVERSION): librenderdoc.so, librenderdoc.dylib, renderdoc.dll.
+# The in-application API looks up those names with GetModuleHandle
+# or dlopen(..., RTLD_NOLOAD).
+#
 if $version.pre_release
   lib{renderdoc}: bin.lib.version = "-$version.project_id"
-else
-  lib{renderdoc}: bin.lib.version = "-$version.major.$version.minor"
 
-# Install only the public in-application API header, as CMake does.
+# Don't install private headers. The public in-application API header is
+# installed by librenderdoc-app.
 #
 {hxx ixx txx}{*}: install = false
-api/app/hxx{renderdoc_app}@api/app/:
-{
-  install         = include/
-  install.subdirs = false
-}

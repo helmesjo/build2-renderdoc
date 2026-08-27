@@ -22,6 +22,9 @@ if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
 if ($cxx.target.class == 'macos')
   import impl_libs += libmetal-cpp%lib{metal-cpp}
 
+if ($cxx.target.class == 'linux')
+  import impl_libs += libplthook%lib{plthook}
+
 out_pfx = [dir_path] $out_root/src/
 src_pfx = [dir_path] $src_root/src/
 
@@ -76,7 +79,7 @@ lib{renderdoc}: os/posix/cxx{posix_network \
 lib{renderdoc}: os/posix/hxx{posix_network posix_specific}: include = $posix
 lib{renderdoc}: os/posix/linux/cxx{*}: include = $linux
 lib{renderdoc}: os/win32/{hxx cxx}{*}: include = $windows
-lib{renderdoc}: 3rdparty/plthook/{hxx c}{*}: include = $linux
+lib{renderdoc}: 3rdparty/plthook/hxx{plthook}: include = adhoc
 
 # Vulkan driver.
 #

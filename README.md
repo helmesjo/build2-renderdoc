@@ -5,8 +5,12 @@ a frame-capture graphics debugger.
 
 This file contains setup instructions that are more appropriate for
 development than consumption. If you want to use these packages in a
-`build2`-based project, see [`librenderdoc/PACKAGE-README.md`](librenderdoc/PACKAGE-README.md)
-and [`renderdoccmd/PACKAGE-README.md`](renderdoccmd/PACKAGE-README.md).
+`build2`-based project, see
+[`librenderdoc-app/PACKAGE-README.md`](librenderdoc-app/PACKAGE-README.md)
+(in-application API header only),
+[`librenderdoc/PACKAGE-README.md`](librenderdoc/PACKAGE-README.md)
+(capture/replay library), and
+[`renderdoccmd/PACKAGE-README.md`](renderdoccmd/PACKAGE-README.md).
 
 The development setup uses the standard `bdep`-based workflow. On macOS use
 Apple Clang or Homebrew LLVM, not Homebrew GCC. GCC cannot compile the

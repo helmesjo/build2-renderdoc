@@ -1,6 +1,7 @@
 import libs = librenderdoc%lib{renderdoc}
+import libs += libcmdline%lib{cmdline}
 
-exe{renderdoccmd}: {hxx cxx}{renderdoccmd} 3rdparty/cmdline/hxx{cmdline} $libs testscript
+exe{renderdoccmd}: {hxx cxx}{renderdoccmd} $libs testscript
 exe{renderdoccmd}: cxx{renderdoccmd_linux}: include = ($cxx.target.class == 'linux')
 exe{renderdoccmd}: cxx{renderdoccmd_apple}: include = ($cxx.target.class == 'macos')
 exe{renderdoccmd}: mm{apple/cocoa_window}: include = ($cxx.target.class == 'macos')
@@ -11,10 +12,10 @@ exe{renderdoccmd}: cxx{renderdoccmd_win32}: include = ($cxx.target.class == 'win
 #
 # PYTHON_AVAILALBE is the upstream spelling.
 #
-# subdir=src: sources and the api/3rdparty overlays live in src_base, not src_root.
+# subdir=src: sources and the api/ overlay live in src_base, not src_root.
 #
 cxx.poptions += "-I$out_root" "-I$src_root" "-I$out_base" "-I$src_base" \
-                "-I$src_base/3rdparty" "-I$src_base/api" \
+                "-I$src_base/api" \
                 -DPYTHON_AVAILALBE=0
 
 cxx.poptions += -DRENDERDOC_SUPPORT_VULKAN

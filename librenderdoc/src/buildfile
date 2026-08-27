@@ -12,7 +12,8 @@ import impl_libs += libvulkan-loader%lib{vulkan} \
                     stb_image_resize2%lib{stb_image_resize2} \
                     stb_truetype%lib{stb_truetype} \
                     libjpeg-compressor%lib{jpeg-compressor} \
-                    libtinyfiledialogs%lib{tinyfiledialogs}
+                    libtinyfiledialogs%lib{tinyfiledialogs} \
+                    libhalf%lib{half}
 
 # MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')

@@ -17,6 +17,7 @@ package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
 depends: librenderdoc == $
+depends: libcmdline ^0.0.1-
 build-include: linux**-x86_64**
 build-include: macos**
 build-include: windows**-x86_64**

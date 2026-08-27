@@ -11,7 +11,8 @@ import impl_libs += libvulkan-loader%lib{vulkan} \
                     stb_image_write%lib{stb_image_write} \
                     stb_image_resize2%lib{stb_image_resize2} \
                     stb_truetype%lib{stb_truetype} \
-                    libjpeg-compressor%lib{jpeg-compressor}
+                    libjpeg-compressor%lib{jpeg-compressor} \
+                    libtinyfiledialogs%lib{tinyfiledialogs}
 
 # MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
@@ -46,7 +47,6 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
                 data/{hxx}{embedded_files glsl_shaders} \
                 3rdparty/md5/{hxx c}{*} \
                 3rdparty/superluminal/{hxx cxx}{*} \
-                3rdparty/tinyfiledialogs/{hxx c}{*} \
                 3rdparty/compressonator/{hxx cxx}{*} \
                 3rdparty/tinyexr/cxx{tinyexr_impl} \
                 3rdparty/stb/c{stb_impl} \

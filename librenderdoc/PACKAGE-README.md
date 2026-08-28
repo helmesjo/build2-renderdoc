@@ -45,6 +45,19 @@ used in `apple_helpers.mm` and the Metal/GL helpers (the same limitation as
 is supported.
 
 
+## Vendored files
+
+A few small files stay in-tree rather than as separate dependencies, since
+none has an independent upstream to unbundle from:
+
+- `3rdparty/md5/` - Solar Designer's public-domain MD5, used for DXBC
+  shader-bytecode hashing. No versioned upstream, just a wiki page.
+- `3rdparty/superluminal/` - Superluminal's C API header for optional
+  profiler marker regions. Ships only inside their installer, not a repo.
+- `3rdparty/include-bin/` - a small build-time tool that embeds shader and
+  manifest data as C arrays. No known upstream repo.
+
+
 ## Configuration variables
 
 ```

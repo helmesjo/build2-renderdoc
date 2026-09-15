@@ -301,7 +301,8 @@ cc.poptions =+ "-I$src_pfx/3rdparty" "-I$src_pfx"
 if ($out_pfx != $src_pfx)
   cc.poptions =+ "-I$out_pfx"
 
-cc.poptions += -DRDOC_BASE_NAME=renderdoc -DRENDERDOC_EXPORTS -DRELEASE
+cc.poptions += -DRDOC_BASE_NAME=renderdoc -DRENDERDOC_EXPORTS -DRELEASE \
+               -DRENDERDOC_VULKAN_JSON_SUFFIX=
 
 if $config.librenderdoc.vulkan
   cc.poptions += -DRENDERDOC_SUPPORT_VULKAN -DVK_ENABLE_BETA_EXTENSIONS

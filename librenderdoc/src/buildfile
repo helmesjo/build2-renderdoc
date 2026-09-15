@@ -245,8 +245,7 @@ for f: $embed_files
   {{
     diag include-bin $>
     rel = $posix_string($relative($path($<[0]), $src_base))
-    cd $src_base
-    $path($<[1]) $rel $path($>)
+    env -c $src_base -- $path($<[1]) $rel $path($>)
   }}
 
   lib{renderdoc}: c{$n}
@@ -259,8 +258,7 @@ c{driver_vulkan_renderdoc_json}: driver/vulkan/in{renderdoc.json.} exe{include-b
 {{
   diag include-bin $>
   rel = $posix_string($relative($path($<[0]), $src_base))
-  cd $src_base
-  $path($<[1]) $rel $path($>)
+  env -c $src_base -- $path($<[1]) $rel $path($>)
 }}
 lib{renderdoc}: c{driver_vulkan_renderdoc_json}
 

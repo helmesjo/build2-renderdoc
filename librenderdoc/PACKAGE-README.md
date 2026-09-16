@@ -13,7 +13,7 @@ Add the following `depends` value to your `manifest`, adjusting the version
 constraint as appropriate:
 
 ```
-depends: librenderdoc ^1.45.0-
+depends: librenderdoc ^1.45.0
 ```
 
 Then import the library in your `buildfile`:

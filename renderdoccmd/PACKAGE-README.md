@@ -11,7 +11,7 @@ Add the following build-time `depends` value to your `manifest`, adjusting the
 version constraint as appropriate:
 
 ```
-depends: * renderdoccmd ^1.45.0-
+depends: * renderdoccmd ^1.45.0
 ```
 
 Then import the executable in your `buildfile`:

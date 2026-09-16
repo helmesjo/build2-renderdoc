@@ -24,7 +24,7 @@ Add the following `depends` value to your `manifest`, adjusting the version
 constraint as appropriate:
 
 ```
-depends: librenderdoc-app ^1.45.0-
+depends: librenderdoc-app ^1.45.0
 ```
 
 Then import the library in your `buildfile`:

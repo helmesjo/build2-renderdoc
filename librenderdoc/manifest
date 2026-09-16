@@ -17,7 +17,7 @@ package-email: packaging@build2.org ; Mailing list.
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
 depends: librenderdoc-app == $
-depends: libvulkan-loader ^1.4.359-
+depends: libvulkan-loader ^1.4.359
 depends: libzstd ^1.5.5
 depends: pugixml ^1.12.1
 depends: libminiz ^3.0.2
@@ -27,13 +27,13 @@ depends: stb_image ^2.30.0
 depends: stb_image_write ^1.16.0
 depends: stb_image_resize2 ^2.18.0
 depends: stb_truetype ^1.26.0
-depends: libjpeg-compressor ^1.0.5-
-depends: libtinyfiledialogs ^3.21.4-
-depends: libhalf ^2.2.0-
-depends: libcmp-core ^4.5.52-
-depends: libglslang ^16.5.0-
-depends: libplthook ^0.0.1- ? ($cxx.target.class == 'linux')
-depends: libdirectx-headers ^1.619.5- ? \
+depends: libjpeg-compressor ^1.0.5
+depends: libtinyfiledialogs ^3.21.4
+depends: libhalf ^2.2.0
+depends: libcmp-core ^4.5.52
+depends: libglslang ^16.5.0
+depends: libplthook ^0.0.1 ? ($cxx.target.class == 'linux')
+depends: libdirectx-headers ^1.619.5 ? \
   ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
 depends:
 \

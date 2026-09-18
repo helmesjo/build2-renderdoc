@@ -1,0 +1,12 @@
+: discover-capture-layer
+:
+: VK_ADD_IMPLICIT_LAYER_PATH is set for the duration of this one invocation
+: only (Testscript env, hermetic, so it does not pick up any
+: system-registered RenderDoc install), from $layer_dir (buildfile
+: variable, see ./buildfile). VK_ADD_LAYER_PATH only affects explicit
+: layers, not implicit ones like this capture layer.
+: ENABLE_VULKAN_RENDERDOC_CAPTURE is the manifest's own activation gate
+: (VULKAN_ENABLE_VAR), which enumeration does not actually require, but it
+: is set anyway to exercise the manifest as actually written.
+:
+env VK_ADD_IMPLICIT_LAYER_PATH=$layer_dir ENABLE_VULKAN_RENDERDOC_CAPTURE=1 -- $*

@@ -43,6 +43,7 @@ or register the layer at runtime as described in
 
 ```
 lib{renderdoc}
+json{renderdoc_capture}
 ```
 
 The capture/replay library. Replay headers stay private, matching upstream
@@ -55,6 +56,10 @@ On macOS the compiler must be Clang. GCC cannot parse the Objective-C blocks
 used in `apple_helpers.mm` and the Metal/GL helpers (the same limitation as
 `libmetal-cpp`). Homebrew `g++` on macOS is rejected at configure. Linux GCC
 is supported.
+
+`json{renderdoc_capture}` is the build-tree Vulkan capture-layer manifest
+that exists for this project's own testing (see `tests/vulkan-layer/`), not
+a general consumer API. The installed manifest is described above.
 
 
 ## Vendored files

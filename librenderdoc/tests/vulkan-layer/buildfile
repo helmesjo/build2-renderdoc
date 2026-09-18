@@ -1,0 +1,30 @@
+windows = ($cxx.target.class == 'windows')
+shared = ($bin.lib != 'static')
+
+import vk = libvulkan-loader%lib{vulkan}
+
+# Queried for the manifest path only (librenderdoc.layer_json), never used
+# as a prerequisite. Null against a static-only install, which has no
+# libs{}.
+#
+import? [metadata, rule_hint=cxx.link] renderdoc = librenderdoc%libs{renderdoc}
+
+# The build-tree manifest, so updating the driver also builds it. Null
+# against an installed librenderdoc, whose manifest is already installed.
+#
+import? json = librenderdoc%json{renderdoc_capture}
+
+exe{driver}: {hxx ixx txx cxx}{**} $vk testscript
+exe{driver}: $json: include = adhoc
+exe{driver}: install = false
+
+if ($renderdoc != [null])
+  testscript{*}: layer_dir = \
+    $posix_string($directory($($renderdoc: librenderdoc.layer_json)))
+
+# The manifest only exists for the loader to discover (see
+# ../../src/buildfile): a static build has no shared library for it to
+# name, and it is never built on Windows (registry-based discovery there,
+# not json manifests).
+#
+./: exe{driver}: include = ($shared && !$windows && $renderdoc != [null])

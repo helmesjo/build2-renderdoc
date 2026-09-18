@@ -404,7 +404,15 @@ lib_leaf = ($macos   ? "librenderdoc$ver_sfx"".dylib" : \
             $windows ? "renderdoc$ver_sfx"".dll"      : \
                        "librenderdoc$ver_sfx"".so")
 
+# Two manifests from the same template: json{renderdoc_capture} in the
+# build tree and json{renderdoc_capture-install} for the install.
+#
+# The Vulkan spec resolves a relative library_path against the json's own
+# directory. In the build tree the json and lib{renderdoc} share out_base
+# (both declared in this buildfile), so the bare $lib_leaf is enough.
+#
 json{renderdoc_capture}: driver/vulkan/in{renderdoc.json.}
+json{renderdoc_capture}: libs{renderdoc}: include = adhoc
 json{renderdoc_capture}:
 {
   VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture
@@ -416,6 +424,11 @@ json{renderdoc_capture}:
   dist = false
 }
 
+# Installed under config.install.root, with library_path relative to the
+# json's install directory so relocatable installs keep working. Falls back
+# to a placeholder when config.install.root is not set (ordinary
+# development build), in which case the target is never installed.
+#
 layer_etcdir = ($install.root != [null] \
   ? $install.resolve([dir_path] etc/vulkan/implicit_layer.d/, [dir_path]) \
   : [dir_path] '/unconfigured')
@@ -424,6 +437,7 @@ layer_libdir = ($install.root != [null] \
   : [dir_path] '/unconfigured')
 
 json{renderdoc_capture-install}: driver/vulkan/in{renderdoc.json.}
+json{renderdoc_capture-install}: libs{renderdoc}: include = adhoc
 json{renderdoc_capture-install}:
 {
   VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture

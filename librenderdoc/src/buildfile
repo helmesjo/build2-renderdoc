@@ -402,6 +402,11 @@ lib_leaf = ($macos   ? "librenderdoc$ver_sfx"".dylib" : \
             $windows ? "renderdoc$ver_sfx"".dll"      : \
                        "librenderdoc$ver_sfx"".so")
 
+# Out-of-tree manifest only (never installed, see PACKAGE-README.md: the
+# loader's real scan locations are fixed OS paths independent of
+# config.install.root, so an installed equivalent would be dead output
+# for any prefix other than / itself).
+#
 json{renderdoc_capture}: driver/vulkan/in{renderdoc.json.}
 json{renderdoc_capture}:
 {
@@ -414,27 +419,7 @@ json{renderdoc_capture}:
   dist = false
 }
 
-layer_etcdir = ($install.root != [null] \
-  ? $install.resolve([dir_path] etc/vulkan/implicit_layer.d/, [dir_path]) \
-  : [dir_path] '/unconfigured')
-layer_libdir = ($install.root != [null] \
-  ? $install.resolve($install.lib, $layer_etcdir) \
-  : [dir_path] '/unconfigured')
-
-json{renderdoc_capture-install}: driver/vulkan/in{renderdoc.json.}
-json{renderdoc_capture-install}:
-{
-  VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture
-  VULKAN_ENABLE_VAR = ENABLE_VULKAN_RENDERDOC_CAPTURE
-  RENDERDOC_VERSION_MAJOR = $version.major
-  RENDERDOC_VERSION_MINOR = $version.minor
-  VULKAN_LAYER_MODULE_PATH = $posix_string([path] $layer_libdir/$lib_leaf)
-  install = etc/vulkan/implicit_layer.d/renderdoc_capture.json
-  dist = false
-}
-
-./: json{renderdoc_capture} json{renderdoc_capture-install}: \
-  include = ($shared && !$windows)
+./: json{renderdoc_capture}: include = ($shared && !$windows)
 
 # Export options. Consumers include <renderdoc_app.h> via librenderdoc-app.
 #

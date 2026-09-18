@@ -27,6 +27,16 @@ Include the public header as `<renderdoc_app.h>`. The header typedefs
 consumers that want the exported symbol must declare it themselves.
 
 
+### Vulkan capture layer registration
+
+Registering the Vulkan capture layer is a runtime action, not an
+install-time one: this package never writes a layer manifest outside
+`config.install.root` on its own. The Vulkan loader's implicit-layer scan
+locations are fixed OS paths, independent of any install prefix, and
+upstream's own CMake build has no install-time manifest rule either. See
+`renderdoccmd/PACKAGE-README.md` for how to actually register the layer.
+
+
 ## Importable targets
 
 ```
@@ -76,7 +86,3 @@ On macOS this package depends on `libmetal-cpp` with
 shim remaps Metal option enums to distinct `uint64_t` types so `TypeName<>`
 and the serialiser work, and supplies `pathForResource` /
 `dataWithContentsOfFile` helpers that 381 does not declare.
-
-A Vulkan implicit layer manifest is installed to
-`etc/vulkan/implicit_layer.d/renderdoc_capture.json` when the shared library
-is built on non-Windows targets.

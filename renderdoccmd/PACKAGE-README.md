@@ -32,6 +32,29 @@ built with Clang (Objective-C blocks in `cocoa_window.mm`). It depends on
 `librenderdoc` from this repository (`depends: librenderdoc == $`).
 
 
+## Vulkan capture layer registration
+
+Run this once after installing, to make the Vulkan capture layer
+discoverable by the loader:
+
+```
+renderdoccmd vulkanlayer --register --user
+```
+
+(or `--system` for an elevated, machine-wide registration). This
+self-locates this build's `librenderdoc` and writes the manifest to
+whichever OS-specific location applies (Windows uses the registry instead
+of a manifest file). It must be re-run after reinstalling to a different
+prefix or upgrading to a new version, since the manifest embeds an
+absolute path to that specific install's library.
+
+An application that embeds `<renderdoc_app.h>` directly can instead call
+`RENDERDOC_UpdateVulkanLayerRegistration` itself, the same underlying
+mechanism without shelling out to this command. Distro packaging
+(`.deb`/`.rpm`/Homebrew postinst/postrm) is the intended hook point for
+automatic registration, entirely outside this repository.
+
+
 ## Configuration variables
 
 This package has no configuration variables. Graphics API support follows

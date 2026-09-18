@@ -405,7 +405,9 @@ lib_leaf = ($macos   ? "librenderdoc$ver_sfx"".dylib" : \
                        "librenderdoc$ver_sfx"".so")
 
 # Two manifests from the same template: json{renderdoc_capture} in the
-# build tree and json{renderdoc_capture-install} for the install.
+# build tree and json{renderdoc_capture-install} for the install. The
+# build-tree one is for this package's own tests (tests/vulkan-layer/), not
+# a general consumer API.
 #
 # The Vulkan spec resolves a relative library_path against the json's own
 # directory. In the build tree the json and lib{renderdoc} share out_base
@@ -451,6 +453,21 @@ json{renderdoc_capture-install}:
 
 ./: json{renderdoc_capture} json{renderdoc_capture-install}: \
   include = ($shared && !$windows)
+
+# Manifest path for tests/vulkan-layer: the build-tree json, or the
+# installed json when written to the installed pkg-config file. It lives
+# on libs{renderdoc} because the metadata protocol is how an installed
+# librenderdoc is queried.
+#
+libs{renderdoc}:
+{
+  export.metadata = 1 librenderdoc
+
+  librenderdoc.layer_json = [path] $out_base/renderdoc_capture.json
+  librenderdoc.layer_json.for_install = ($install.root != [null] \
+    ? [path] $install.resolve([dir_path] etc/vulkan/implicit_layer.d/, [dir_path])/renderdoc_capture.json \
+    : [path])
+}
 
 # Export options. Consumers include <renderdoc_app.h> via librenderdoc-app.
 #

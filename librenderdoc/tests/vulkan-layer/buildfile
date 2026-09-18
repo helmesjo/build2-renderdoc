@@ -1,0 +1,19 @@
+windows = ($cxx.target.class == 'windows')
+shared = ($bin.lib != 'static')
+
+import vk = libvulkan-loader%lib{vulkan}
+import! [metadata, rule_hint=cxx.link] renderdoc_meta = librenderdoc%libs{renderdoc}
+
+exe{driver}: {hxx ixx txx cxx}{**} $vk testscript
+exe{driver}: $renderdoc_meta: include = adhoc
+exe{driver}: install = false
+
+testscript{*}: layer_dir = \
+  $posix_string($directory($($renderdoc_meta: librenderdoc.layer_json)))
+
+# json{renderdoc_capture} only exists for the loader to discover (see
+# ../../src/buildfile): a static build has no shared library for it to
+# name, and it is never built on Windows (registry-based discovery there,
+# not json manifests).
+#
+./: exe{driver}: include = ($shared && !$windows)

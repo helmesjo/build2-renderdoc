@@ -404,8 +404,15 @@ lib_leaf = ($macos   ? "librenderdoc$ver_sfx"".dylib" : \
 
 # Out-of-tree manifest only (never installed, see PACKAGE-README.md: the
 # loader's real scan locations are fixed OS paths independent of
-# config.install.root, so an installed equivalent would be dead output
-# for any prefix other than / itself).
+# config.install.root, so an installed equivalent would be dead output for
+# any prefix other than / itself). Exists for this project's own testing
+# (tests/vulkan-layer/), not a general consumer API.
+#
+# $lib_leaf is a bare filename, not a path: the Vulkan spec resolves a
+# relative library_path against the json's own directory, and this target
+# and lib{renderdoc} always share out_base (both declared in this
+# buildfile), so the two land side by side and the bare name resolves
+# correctly without an explicit $relative() computation.
 #
 json{renderdoc_capture}: driver/vulkan/in{renderdoc.json.}
 json{renderdoc_capture}:
@@ -420,6 +427,21 @@ json{renderdoc_capture}:
 }
 
 ./: json{renderdoc_capture}: include = ($shared && !$windows)
+
+# Path metadata for tests/vulkan-layer, piggybacked on libs{renderdoc}'s own
+# export.metadata rather than a plain import of json{renderdoc_capture}
+# directly: a target's own path is only assigned once its rule has matched,
+# but a plain import lets a consumer reference that path before anything
+# has forced a match (confirmed: b test fails with "path is not assigned").
+# A metadata value is a plain string computed from known variables, with no
+# such ordering requirement.
+#
+libs{renderdoc}:
+{
+  export.metadata = 1 librenderdoc
+
+  librenderdoc.layer_json = [path] $out_base/renderdoc_capture.json
+}
 
 # Export options. Consumers include <renderdoc_app.h> via librenderdoc-app.
 #

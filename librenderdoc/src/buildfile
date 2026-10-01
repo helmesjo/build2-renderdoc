@@ -384,10 +384,37 @@ obj{driver/ihv/nv/**}:
 
 # Match upstream: -fno-strict-aliasing, hidden visibility. No -Wall / -Werror.
 #
+# Upstream also passes the shared -Wno-* flags below for GCC and Clang.
+# -Wswitch is not in that set. The Vulkan headers add enumerators that the
+# driver switches do not handle, so disable it here as well. The flags in
+# the GCC arm follow upstream's version cutoffs.
+#
 if ($cxx.class == 'gcc')
 {
   cc.coptions += -fno-strict-aliasing -fvisibility=hidden
   cxx.coptions += -fvisibility-inlines-hidden
+
+  cxx.coptions += -Wno-unused-variable -Wno-unused-parameter \
+                  -Wno-unused-result -Wno-type-limits \
+                  -Wno-missing-field-initializers -Wno-unknown-pragmas \
+                  -Wno-reorder -Wno-switch
+
+  if ($cxx.id == 'gcc')
+  {
+    cxx.coptions += -Wno-unused-but-set-variable -Wno-maybe-uninitialized \
+                    -Wno-class-memaccess
+
+    # False positives from inlining (GCC bug 103993).
+    #
+    if ($cxx.version > 11.0.9)
+      cxx.coptions += -Wno-mismatched-new-delete
+
+    if ($cxx.version > 11.9)
+      cxx.coptions += -Wno-unused-value
+
+    if ($cxx.version > 13.9)
+      cxx.coptions += -Wno-cast-user-defined
+  }
 }
 
 # rdcstr.h declares operator"" _lit. Clang warns about that space (CWG2521)

@@ -315,21 +315,63 @@ if $config.librenderdoc.gl
 if $config.librenderdoc.metal
   cc.poptions += -DRENDERDOC_SUPPORT_METAL
 
+# Xlib and XCB follow the headers on the compiler search path. Both stay
+# enabled together when both headers are present (upstream defaults).
+# Wayland stays off: upstream leaves that support disabled.
+#
+have_x11_xlib_h = [bool] false
+have_xcb_xcb_h = [bool] false
+
+if $linux
+{
+  have_x11_xlib_h = [bool] ($c.find_system_header("X11/Xlib.h") != [null])
+  have_xcb_xcb_h = [bool] ($c.find_system_header("xcb/xcb.h") != [null])
+}
+
 switch $cxx.target.class
 {
   case 'macos'
     cc.poptions += -DRENDERDOC_PLATFORM_APPLE
   case 'linux'
-    cc.poptions += -DRENDERDOC_PLATFORM_LINUX \
-                   -DRENDERDOC_WINDOWING_XLIB -DRENDERDOC_WINDOWING_XCB \
-                   -DVK_USE_PLATFORM_XLIB_KHR -DVK_USE_PLATFORM_XLIB_XRANDR_EXT \
-                   -DVK_USE_PLATFORM_XCB_KHR -DVK_USE_PLATFORM_WIN32_KHR
+  {
+    cc.poptions += -DRENDERDOC_PLATFORM_LINUX
+
+    if $have_x11_xlib_h
+      cc.poptions += -DRENDERDOC_WINDOWING_XLIB
+
+    if $have_xcb_xcb_h
+      cc.poptions += -DRENDERDOC_WINDOWING_XCB
+  }
   case 'windows'
-    cc.poptions += -DRENDERDOC_PLATFORM_WIN32 -DVK_USE_PLATFORM_WIN32_KHR
+    cc.poptions += -DRENDERDOC_PLATFORM_WIN32
+}
+
+# VK_USE_PLATFORM_* are directory-scoped in upstream
+# driver/vulkan/CMakeLists.txt. Xlib's Bool macro must stay out of other
+# TUs. Linux also defines WIN32 so Win32 captures still type-check. The
+# official/vulkan.h shim stubs the Win32 and Xrandr types.
+#
+vulkan_poptions =
+
+if $linux
+{
+  vulkan_poptions += -DVK_USE_PLATFORM_WIN32_KHR
+
+  if $have_x11_xlib_h
+    vulkan_poptions += -DVK_USE_PLATFORM_XLIB_KHR \
+                       -DVK_USE_PLATFORM_XLIB_XRANDR_EXT
+
+  if $have_xcb_xcb_h
+    vulkan_poptions += -DVK_USE_PLATFORM_XCB_KHR
 }
 
 if $macos
-  cxx.poptions += -DVK_USE_PLATFORM_MACOS_MVK -DVK_USE_PLATFORM_METAL_EXT
+  vulkan_poptions += -DVK_USE_PLATFORM_MACOS_MVK -DVK_USE_PLATFORM_METAL_EXT
+
+if $windows
+  vulkan_poptions += -DVK_USE_PLATFORM_WIN32_KHR
+
+obj{driver/vulkan/**}: cxx.poptions += $vulkan_poptions
 
 obj{driver/ihv/nv/**}:
 {
@@ -360,7 +402,13 @@ switch $cxx.target.class
   }
   case 'linux'
   {
-    cxx.libs += -ldl -lm -lrt -lX11 -lxcb -lxcb-keysyms -pthread
+    cxx.libs += -ldl -lm -lrt -pthread
+
+    if $have_x11_xlib_h
+      cxx.libs += -lX11
+
+    if $have_xcb_xcb_h
+      cxx.libs += -lxcb -lxcb-keysyms
   }
   case 'windows'
   {

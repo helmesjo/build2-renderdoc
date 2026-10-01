@@ -279,10 +279,18 @@ lib{renderdoc}: driver/ihv/arm/hxx{official/**}: include = adhoc
 lib{renderdoc}: $impl_libs $intf_libs
 
 # posix_libentry last so library_loaded() runs after other static
-# constructors (CMake renderdoc_libentry). Direct object, not a helper
-# liba{}, so install does not hit a for-install flavour clash.
+# constructors. Upstream builds this file as renderdoc_libentry and
+# appends that archive. Shared links the object directly. Static
+# consumers link the one-file archive whole (-force_load on Apple,
+# --whole-archive on ELF). Prerequisite of liba{} only, so install
+# does not hit a for-install flavour clash.
 #
-lib{renderdoc}: os/posix/cxx{posix_libentry}: include = $posix
+libs{renderdoc}: os/posix/cxx{posix_libentry}: include = $posix
+
+liba{renderdoc_libentry}: os/posix/cxx{posix_libentry}
+liba{renderdoc_libentry}: bin.whole = true
+
+liba{renderdoc}: liba{renderdoc_libentry}: include = $posix
 
 # GIT_COMMIT_HASH is a compile define, not a checked-in hash.
 #
@@ -465,16 +473,6 @@ if $linux
     "-Wl,--undefined,force_include_libentry" \
     "-Wl,--version-script,$src_base/renderdoc.version" \
     "-Wl,--no-undefined"
-
-# The archive does not pull posix_libentry.o unless something references
-# force_include_libentry. Same symbol the shared Linux link already
-# forces undefined. Apple uses the Mach-O spelling.
-#
-if $linux
-  liba{renderdoc}: cxx.export.loptions = "-Wl,--undefined,force_include_libentry"
-
-if $macos
-  liba{renderdoc}: cxx.export.loptions = "-Wl,-u,_force_include_libentry"
 
 # Vulkan implicit-layer json (MoltenVK ICD pattern, adjusted for a layer).
 #

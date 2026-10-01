@@ -34,6 +34,13 @@ cxx.poptions += "-I$out_root" "-I$src_root" "-I$out_base" "-I$src_base" \
                 -DPYTHON_AVAILALBE=0
 
 
+# rdcstr.h declares operator"" _lit. Clang warns about that space (CWG2521).
+# GCC warns only in C++23. Apple Clang's id is clang-apple, so match the type.
+# The flag exists from Clang 17. $cxx.version.major is the LLVM major for both.
+#
+if ($cxx.id.type == 'clang' && $cxx.version.major >= 17)
+  cxx.coptions += -Wno-deprecated-literal-operator
+
 # API headers included by this executable trigger -Wreorder on Viewport
 # (common_pipestate.h) and -Wclass-memaccess on ResourceId. The library
 # already passes these flags for the same headers.

@@ -29,9 +29,15 @@ exe{renderdoccmd}: api/replay/file{pipestate.inl renderdoc_tostr.inl}:
 #
 # subdir=src: sources and the api/ overlay live in src_base, not src_root.
 #
+# DoStringise is hidden in the shared library, so the executable keeps its
+# own copies. A static link is one image and uses the archive copies.
+#
 cxx.poptions += "-I$out_root" "-I$src_root" "-I$out_base" "-I$src_base" \
                 "-I$src_base/api" \
                 -DPYTHON_AVAILALBE=0
+
+if ($bin.link_member(exe) == 'liba')
+  cxx.poptions += -DRDOC_LINK_STATIC
 
 cxx.poptions += -DRENDERDOC_SUPPORT_VULKAN
 

@@ -1,0 +1,28 @@
+--- renderdoccmd.cpp.orig	2026-08-26 02:17:18
++++ renderdoccmd.cpp	2026-10-02 00:20:00
+@@ -43,6 +43,8 @@
+ // normally this is in the renderdoc core library, but it's needed for the 'unknown enum' path,
+ // so we implement it here using ostringstream. It's not great, but this is a very uncommon path -
+ // either for invalid values or for when a new enum is added and the code isn't updated
++// Omitted when linking the static library, where those copies are visible.
++#ifndef RDOC_LINK_STATIC
+ template <>
+ rdcstr DoStringise(const uint32_t &el)
+ {
+@@ -50,13 +52,16 @@
+   oss << el;
+   return conv(oss.str());
+ }
++#endif
+ 
+ inline std::ostream &operator<<(std::ostream &os, rdcstr const &str)
+ {
+   return os << str.c_str();
+ }
+ 
++#ifndef RDOC_LINK_STATIC
+ #include <replay/renderdoc_tostr.inl>
++#endif
+ 
+ bool usingKillSignal = false;
+ volatile bool killSignal = false;

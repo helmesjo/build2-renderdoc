@@ -419,14 +419,13 @@ switch $cxx.target.class
   }
 }
 
+libs{renderdoc}: file{renderdoc.version}: include = adhoc
+
 if $linux
-{
-  libs{renderdoc}: file{renderdoc.version}: include = adhoc
   libs{renderdoc}: cxx.loptions += \
     "-Wl,--undefined,force_include_libentry" \
     "-Wl,--version-script,$src_base/renderdoc.version" \
     "-Wl,--no-undefined"
-}
 
 # Vulkan implicit-layer json (MoltenVK ICD pattern, adjusted for a layer).
 #

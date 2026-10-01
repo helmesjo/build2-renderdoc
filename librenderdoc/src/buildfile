@@ -466,6 +466,16 @@ if $linux
     "-Wl,--version-script,$src_base/renderdoc.version" \
     "-Wl,--no-undefined"
 
+# The archive does not pull posix_libentry.o unless something references
+# force_include_libentry. Same symbol the shared Linux link already
+# forces undefined. Apple uses the Mach-O spelling.
+#
+if $linux
+  liba{renderdoc}: cxx.export.loptions = "-Wl,--undefined,force_include_libentry"
+
+if $macos
+  liba{renderdoc}: cxx.export.loptions = "-Wl,-u,_force_include_libentry"
+
 # Vulkan implicit-layer json (MoltenVK ICD pattern, adjusted for a layer).
 #
 in.symbol = '@'

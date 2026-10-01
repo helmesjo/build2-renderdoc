@@ -62,9 +62,9 @@ libmetal-cpp ^381.0.0
   }
 }
 \
+builds: -( +macos &gcc ) ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
 builds: -( +windows &gcc ) ; Upstream Windows is Visual Studio only.
 builds: -( +windows &static ) ; Capture injects renderdoc.dll, so Windows is shared only.
 builds: -( +linux &static ) ; No static system libwayland-client for static consumers.
 build-include: macos**
-build-exclude: macos**-gcc** ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
 build-exclude: ** ; Downloads the large pre-built SDK archive from NVIDIA.

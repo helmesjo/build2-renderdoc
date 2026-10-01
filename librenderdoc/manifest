@@ -49,6 +49,7 @@ libmetal-cpp ^381.0.0-
 \
 builds: -( +windows &gcc ) ; Upstream Windows is Visual Studio only.
 builds: -( +windows &static ) ; Capture injects renderdoc.dll, so Windows is shared only.
+builds: -( +linux &static ) ; No static system libwayland-client for static consumers.
 build-include: linux**
 build-include: macos**
 build-include: windows**/x86_64-**

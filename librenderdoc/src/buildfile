@@ -315,17 +315,19 @@ if $config.librenderdoc.gl
 if $config.librenderdoc.metal
   cc.poptions += -DRENDERDOC_SUPPORT_METAL
 
-# Xlib and XCB follow the headers on the compiler search path. Both stay
-# enabled together when both headers are present (upstream defaults).
-# Wayland stays off: upstream leaves that support disabled.
+# Xlib, XCB, and Wayland follow the headers on the compiler search path.
+# Wayland also needs linux/input.h (key codes in linux_stringio.cpp).
 #
 have_x11_xlib_h = [bool] false
 have_xcb_xcb_h = [bool] false
+have_wayland = [bool] false
 
 if $linux
 {
   have_x11_xlib_h = [bool] ($c.find_system_header("X11/Xlib.h") != [null])
   have_xcb_xcb_h = [bool] ($c.find_system_header("xcb/xcb.h") != [null])
+  have_wayland = [bool] ($c.find_system_header("wayland-client.h") != [null] && \
+                         $c.find_system_header("linux/input.h") != [null])
 }
 
 switch $cxx.target.class
@@ -341,6 +343,9 @@ switch $cxx.target.class
 
     if $have_xcb_xcb_h
       cc.poptions += -DRENDERDOC_WINDOWING_XCB
+
+    if $have_wayland
+      cc.poptions += -DRENDERDOC_WINDOWING_WAYLAND
   }
   case 'windows'
     cc.poptions += -DRENDERDOC_PLATFORM_WIN32
@@ -363,6 +368,9 @@ if $linux
 
   if $have_xcb_xcb_h
     vulkan_poptions += -DVK_USE_PLATFORM_XCB_KHR
+
+  if $have_wayland
+    vulkan_poptions += -DVK_USE_PLATFORM_WAYLAND_KHR
 }
 
 if $macos
@@ -409,6 +417,9 @@ switch $cxx.target.class
 
     if $have_xcb_xcb_h
       cxx.libs += -lxcb -lxcb-keysyms
+
+    if $have_wayland
+      cxx.libs += -lwayland-client
   }
   case 'windows'
   {

@@ -7,6 +7,21 @@ exe{renderdoccmd}: cxx{renderdoccmd_apple}: include = ($cxx.target.class == 'mac
 exe{renderdoccmd}: mm{apple/cocoa_window}: include = ($cxx.target.class == 'macos')
 exe{renderdoccmd}: cxx{renderdoccmd_win32}: include = ($cxx.target.class == 'windows')
 
+# API headers are included as <replay/...> and <app/renderdoc_app.h>.
+# Private to this executable.
+#
+exe{renderdoccmd}: api/replay/hxx{*} api/app/hxx{*}:
+{
+  include = adhoc
+  install = false
+}
+
+exe{renderdoccmd}: api/replay/file{pipestate.inl renderdoc_tostr.inl}:
+{
+  include = adhoc
+  install = false
+}
+
 # Replay headers are the upstream api/ tree, symlinked into this package so
 # archive builds do not need a sibling librenderdoc source path.
 #

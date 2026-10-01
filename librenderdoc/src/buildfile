@@ -317,18 +317,12 @@ if $config.librenderdoc.metal
 
 # Xlib, XCB, and Wayland follow the headers on the compiler search path.
 # Wayland also needs linux/input.h (key codes in linux_stringio.cpp).
+# The macros and libraries are applied only for a Linux target.
 #
-have_x11_xlib_h = [bool] false
-have_xcb_xcb_h = [bool] false
-have_wayland = [bool] false
-
-if $linux
-{
-  have_x11_xlib_h = [bool] ($c.find_system_header("X11/Xlib.h") != [null])
-  have_xcb_xcb_h = [bool] ($c.find_system_header("xcb/xcb.h") != [null])
-  have_wayland = [bool] ($c.find_system_header("wayland-client.h") != [null] && \
-                         $c.find_system_header("linux/input.h") != [null])
-}
+have_x11_xlib_h = [bool] ($c.find_system_header("X11/Xlib.h") != [null])
+have_xcb_xcb_h = [bool] ($c.find_system_header("xcb/xcb.h") != [null])
+have_wayland = [bool] ($c.find_system_header("wayland-client.h") != [null] && \
+                       $c.find_system_header("linux/input.h") != [null])
 
 switch $cxx.target.class
 {

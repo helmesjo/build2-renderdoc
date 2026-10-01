@@ -35,6 +35,12 @@ cxx.poptions += "-I$out_root" "-I$src_root" "-I$out_base" "-I$src_base" \
 
 cxx.poptions += -DRENDERDOC_SUPPORT_VULKAN
 
+# rdcstr.h declares operator"" _lit. Clang warns about that space (CWG2521).
+# GCC warns only in C++23. Apple Clang's id is clang-apple, so match the type.
+#
+if ($cxx.id.type == 'clang')
+  cxx.coptions += -Wno-deprecated-literal-operator
+
 switch $cxx.target.class
 {
   case 'macos'

@@ -390,6 +390,13 @@ if ($cxx.class == 'gcc')
   cxx.coptions += -fvisibility-inlines-hidden
 }
 
+# rdcstr.h declares operator"" _lit. Clang warns about that space (CWG2521)
+# from every TU that includes the header. GCC warns only in C++23.
+# Apple Clang's id is clang-apple, so match the type.
+#
+if ($cxx.id.type == 'clang')
+  cxx.coptions += -Wno-deprecated-literal-operator
+
 # System libraries.
 #
 switch $cxx.target.class

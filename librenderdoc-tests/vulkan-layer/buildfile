@@ -1,0 +1,37 @@
+import vk = libvulkan-loader%lib{vulkan}
+import! [metadata, rule_hint=cxx.link] renderdoc = librenderdoc%libs{renderdoc}
+
+# Enumerates the instance layers with the loader pointed at librenderdoc's
+# capture-layer manifest (see testscript).
+#
+# The manifest path comes from libs{renderdoc}'s metadata rather than a
+# direct import of librenderdoc%json{renderdoc_capture}: the metadata
+# protocol (rule_hint=cxx.link) also resolves against an installed
+# librenderdoc, where it names the installed manifest (see
+# librenderdoc/src/buildfile).
+#
+exe{driver}: {hxx ixx txx cxx}{**} $vk testscript
+exe{driver}: install = false
+
+# The capture-layer manifest must exist before the driver runs. The path
+# comes from libs{renderdoc} metadata (see above) so this works for a
+# separately installed librenderdoc as well as an in-tree one. Consumers
+# wait on the library, not on json{renderdoc_capture} (json{} does not
+# import across sys:), so the library produces the json. A custom recipe
+# is used rather than an adhoc prerequisite on libs{renderdoc} itself,
+# which no rule can update once the library is resolved via sys:.
+#
+json{layer}: $renderdoc
+{{
+  json_path = $($renderdoc: librenderdoc.layer_json)
+  depdb hash $json_path
+
+  diag cp $>
+  cp $json_path $path($>)
+}}
+json{layer}: install = false
+json{layer}: dist = false
+
+exe{driver}: json{layer}: include = adhoc
+
+testscript{*}: layer_json = $posix_string($($renderdoc: librenderdoc.layer_json))

@@ -1,0 +1,12 @@
+: discover-capture-layer
+:
+: VK_IMPLICIT_LAYER_PATH is set for the duration of this one invocation
+: only (Testscript env), to the manifest file itself from $layer_json
+: (buildfile variable, see ./buildfile). It replaces the loader's standard
+: implicit-layer search paths, so no system- or user-registered RenderDoc
+: layer is picked up.
+: ENABLE_VULKAN_RENDERDOC_CAPTURE is the manifest's own activation gate
+: (VULKAN_ENABLE_VAR), which enumeration does not actually require, but it
+: is set anyway to exercise the manifest as actually written.
+:
+env VK_IMPLICIT_LAYER_PATH=$layer_json ENABLE_VULKAN_RENDERDOC_CAPTURE=1 -- $*

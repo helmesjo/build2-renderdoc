@@ -29,14 +29,14 @@ consumers that want the exported symbol must declare it themselves.
 
 ### Vulkan capture layer registration
 
-When the shared library is built on a non-Windows target, the Vulkan
-capture-layer manifest is installed to
-`etc/vulkan/implicit_layer.d/renderdoc_capture.json` under
-`config.install.root`. The Vulkan loader only finds it there if it scans
-that directory (for example `/etc/vulkan/implicit_layer.d` for the `/`
-prefix). Otherwise, point `VK_ADD_IMPLICIT_LAYER_PATH` at that directory,
-or register the layer at runtime as described in
-`renderdoccmd/PACKAGE-README.md`.
+When the shared library is built, the Vulkan capture-layer manifest is
+installed to `etc/vulkan/implicit_layer.d/renderdoc_capture.json` under
+`config.install.root`. On Linux and macOS the Vulkan loader only finds it
+there if it scans that directory (for example `/etc/vulkan/implicit_layer.d`
+for the `/` prefix). On Windows the loader does not scan directories for
+implicit layers at all, it reads them from the registry. Otherwise, point
+`VK_ADD_IMPLICIT_LAYER_PATH` at that directory, or register the layer at
+runtime as described in `renderdoccmd/PACKAGE-README.md`.
 
 
 ## Importable targets
@@ -58,7 +58,7 @@ used in `apple_helpers.mm` and the Metal/GL helpers (the same limitation as
 is supported.
 
 `json{renderdoc_capture}` is the build-tree Vulkan capture-layer manifest
-that exists for this project's own testing (see `tests/vulkan-layer/`), not
+that exists for this project's own testing (see `librenderdoc-tests`), not
 a general consumer API. The installed manifest is described above.
 
 

@@ -1,15 +1,24 @@
 : 1
 name: librenderdoc-tests
-version: 0.1.0-a.0.z
+version: 1.45.0-a.0.z
 type: exe
 language: c++
-project: build2-renderdoc
-summary: librenderdoc-tests C++ executable
-license: MIT ; MIT License.
+project: renderdoc
+summary: Frame-capture graphics debugger C++ library (tests)
+license: MIT
 package-description-file: PACKAGE-README.md
-url: https://example.org/upstream
-email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-renderdoc
+url: https://renderdoc.org
+src-url: https://github.com/baldurk/renderdoc
+package-url: https://github.com/build2-packaging/renderdoc
 package-email: packaging@build2.org ; Mailing list.
+topics: graphics, debugger, vulkan, metal, directx
+builds: -static ; vulkan-layer/ needs libs{renderdoc}, which a static-only build does not have.
+builds: -( +macos &gcc ) ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
+builds: -( +windows &gcc ) ; Upstream Windows is Visual Studio only.
+build-include: linux**
+build-include: macos**
+build-include: windows**/x86_64-**
+build-exclude: ** ; Linux, Clang macOS, and 64-bit MSVC Windows (same as librenderdoc).
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
+depends: libvulkan-loader ^1.4.359

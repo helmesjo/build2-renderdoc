@@ -55,3 +55,4 @@ build-include: linux**
 build-include: macos**
 build-include: windows**/x86_64-**
 build-exclude: ** ; Linux, Clang macOS, and 64-bit MSVC Windows.
+tests: librenderdoc-tests == $

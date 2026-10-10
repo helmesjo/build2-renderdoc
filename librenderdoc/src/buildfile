@@ -474,90 +474,20 @@ if $linux
     "-Wl,--version-script,$src_base/renderdoc.version" \
     "-Wl,--no-undefined"
 
-# Vulkan implicit-layer json (MoltenVK ICD pattern, adjusted for a layer).
-#
-in.symbol = '@'
-in.mode = lax
-shared = ($bin.lib != 'static')
-
-# Trailing dot: the template is renderdoc.json, not renderdoc.json.in.
-
-# Same suffix as bin.lib.version below. Final releases are unversioned
-# (upstream CMake sets no SOVERSION). Pre-releases keep the snapshot
-# suffix so they cannot substitute for a final.
-#
-if $version.pre_release
-  ver_sfx = "-$version.project_id"
-else
-  ver_sfx = ""
-
-# Adjacent quotes terminate $ver_sfx. A single string like
-# "librenderdoc$ver_sfx.dylib" would look up ver_sfx.dylib.
-#
-lib_leaf = ($macos   ? "librenderdoc$ver_sfx"".dylib" : \
-            $windows ? "renderdoc$ver_sfx"".dll"      : \
-                       "librenderdoc$ver_sfx"".so")
-
-# Two manifests from the same template: json{renderdoc_capture} in the
-# build tree and json{renderdoc_capture-install} for the install. The
-# build-tree one is for this package's own tests (tests/vulkan-layer/), not
-# a general consumer API.
-#
-# The Vulkan spec resolves a relative library_path against the json's own
-# directory. In the build tree the json and lib{renderdoc} share out_base
-# (both declared in this buildfile), so the bare $lib_leaf is enough.
-#
-json{renderdoc_capture}: driver/vulkan/in{renderdoc.json.}
-json{renderdoc_capture}: libs{renderdoc}: include = adhoc
-json{renderdoc_capture}:
-{
-  VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture
-  VULKAN_ENABLE_VAR = ENABLE_VULKAN_RENDERDOC_CAPTURE
-  RENDERDOC_VERSION_MAJOR = $version.major
-  RENDERDOC_VERSION_MINOR = $version.minor
-  VULKAN_LAYER_MODULE_PATH = $lib_leaf
-  install = false
-  dist = false
-}
-
-# Installed under config.install.root, with library_path relative to the
-# json's install directory so relocatable installs keep working. Falls back
-# to a placeholder when config.install.root is not set (ordinary
-# development build), in which case the target is never installed.
-#
-layer_etcdir = ($install.root != [null] \
-  ? $install.resolve([dir_path] etc/vulkan/implicit_layer.d/, [dir_path]) \
-  : [dir_path] '/unconfigured')
-layer_libdir = ($install.root != [null] \
-  ? $install.resolve($install.lib, $layer_etcdir) \
-  : [dir_path] '/unconfigured')
-
-json{renderdoc_capture-install}: driver/vulkan/in{renderdoc.json.}
-json{renderdoc_capture-install}: libs{renderdoc}: include = adhoc
-json{renderdoc_capture-install}:
-{
-  VULKAN_LAYER_NAME = VK_LAYER_RENDERDOC_Capture
-  VULKAN_ENABLE_VAR = ENABLE_VULKAN_RENDERDOC_CAPTURE
-  RENDERDOC_VERSION_MAJOR = $version.major
-  RENDERDOC_VERSION_MINOR = $version.minor
-  VULKAN_LAYER_MODULE_PATH = $posix_string([path] $layer_libdir/$lib_leaf)
-  install = etc/vulkan/implicit_layer.d/renderdoc_capture.json
-  dist = false
-}
-
-./: json{renderdoc_capture} json{renderdoc_capture-install}: \
-  include = ($shared && !$windows)
-
-# Manifest path for tests/vulkan-layer: the build-tree json, or the
-# installed json when written to the installed pkg-config file. It lives
-# on libs{renderdoc} because the metadata protocol is how an installed
-# librenderdoc is queried.
+# Vulkan capture-layer manifest path, for librenderdoc-tests/vulkan-layer
+# (see ../layer/buildfile, where the actual json{} targets and their
+# install location are declared): the build-tree json, or the installed
+# json when written to the installed pkg-config file. Piggybacked here, on
+# libs{renderdoc}'s own export.metadata, rather than on either json{}
+# target directly: importing a target only loads the buildfile where it
+# is declared, not every buildfile that later adds variables to it, so
+# this has to live wherever the consumer's import actually resolves to.
 #
 libs{renderdoc}:
 {
   export.metadata = 1 librenderdoc
 
-  librenderdoc.layer_json = [path] $out_base/renderdoc_capture.json
+  librenderdoc.layer_json = [path] $out_root/layer/renderdoc_capture.json
   librenderdoc.layer_json.for_install = ($install.root != [null] \
     ? [path] $install.resolve([dir_path] etc/vulkan/implicit_layer.d/, [dir_path])/renderdoc_capture.json \
     : [path])

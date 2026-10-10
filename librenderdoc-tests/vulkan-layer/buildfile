@@ -1,0 +1,16 @@
+import vk = libvulkan-loader%lib{vulkan}
+import! [metadata, rule_hint=cxx.link] renderdoc = librenderdoc%libs{renderdoc}
+
+# Enumerates the instance layers with the loader pointed at librenderdoc's
+# capture-layer manifest (see testscript).
+#
+# The manifest path comes from libs{renderdoc}'s metadata rather than a
+# direct import of librenderdoc%json{renderdoc_capture}: the metadata
+# protocol (rule_hint=cxx.link) also resolves against an installed
+# librenderdoc, where it names the installed manifest (see
+# librenderdoc/src/buildfile).
+#
+exe{driver}: {hxx ixx txx cxx}{**} $vk testscript
+exe{driver}: install = false
+
+testscript{*}: layer_json = $posix_string($($renderdoc: librenderdoc.layer_json))

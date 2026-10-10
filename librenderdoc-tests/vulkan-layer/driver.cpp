@@ -5,10 +5,9 @@
 #include <cstring>
 #include <vector>
 
-// The loader discovers this build's Vulkan capture layer via
-// VK_ADD_IMPLICIT_LAYER_PATH (set by Testscript env, see ./testscript)
-// naming the directory containing the json built by
-// librenderdoc%json{renderdoc_capture}.
+// The loader discovers librenderdoc's Vulkan capture layer via
+// VK_IMPLICIT_LAYER_PATH (set by Testscript env, see ./testscript)
+// naming its manifest.
 // Enumeration alone needs no VkInstance or physical device: the loader
 // reads layer name, versions, and description straight out of the json,
 // without loading the layer's library, so this proves manifest discovery

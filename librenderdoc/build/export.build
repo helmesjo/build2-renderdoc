@@ -1,6 +1,10 @@
 $out_root/
 {
   include src/
+  include layer/
 }
 
-export $out_root/src/$import.target
+if ($import.target == json{renderdoc_capture})
+  export $out_root/layer/$import.target
+else
+  export $out_root/src/$import.target

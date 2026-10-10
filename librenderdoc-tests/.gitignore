@@ -30,3 +30,12 @@
 # Compilation database.
 #
 compile_commands.json
+
+# Test executables.
+#
+driver
+
+# Testscript output directories (can be symlinks).
+#
+test
+test-*

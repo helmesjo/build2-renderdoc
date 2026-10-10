@@ -68,3 +68,4 @@ builds: -( +windows &static ) ; Capture injects renderdoc.dll, so Windows is sha
 builds: -( +linux &static ) ; No static system libwayland-client for static consumers.
 build-include: macos**
 build-exclude: ** ; Downloads the large pre-built SDK archive from NVIDIA.
+tests: librenderdoc-tests == $

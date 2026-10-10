@@ -1,45 +1,17 @@
-# librenderdoc-tests - An executable
+# librenderdoc-tests - Frame-capture graphics debugger C++ library (tests)
 
-This is a `build2` package for the [`<UPSTREAM-NAME>`](https://<UPSTREAM-URL>)
-executable. It is a <SUMMARY-OF-FUNCTIONALITY>.
-
-Note that the `librenderdoc-tests` executable in this package provides `build2` metadata.
-
-
-## Usage
-
-To start using `librenderdoc-tests` in your project, add the following build-time
-`depends` value to your `manifest`, adjusting the version constraint as
-appropriate:
-
-```
-depends: * librenderdoc-tests ^<VERSION>
-```
-
-Then import the executable in your `buildfile`:
-
-```
-import! [metadata] <TARGET> = librenderdoc-tests%exe{<TARGET>}
-```
+This is a `build2` package containing the test suite for the
+[`renderdoc`](https://github.com/baldurk/renderdoc) library.
+`vulkan-layer/` checks that the Vulkan loader discovers and parses
+`librenderdoc`'s capture-layer manifest (the installed one, when tested
+against an installed `librenderdoc`).
 
 
 ## Importable targets
 
-This package provides the following importable targets:
-
-```
-exe{<TARGET>}
-```
-
-<DESCRIPTION-OF-IMPORTABLE-TARGETS>
+This package exports no targets.
 
 
 ## Configuration variables
 
-This package provides the following configuration variables:
-
-```
-[bool] config.librenderdoc_tests.<VARIABLE> ?= false
-```
-
-<DESCRIPTION-OF-CONFIG-VARIABLES>
+This package provides no configuration variables.

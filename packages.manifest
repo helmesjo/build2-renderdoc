@@ -6,3 +6,6 @@ location: renderdoccmd/
 
 :
 location: librenderdoc-app/
+
+:
+location: librenderdoc-tests/

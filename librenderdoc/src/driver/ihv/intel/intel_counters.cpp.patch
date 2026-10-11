@@ -1,0 +1,11 @@
+--- intel_counters.cpp.orig	2026-10-10 17:56:24 +0200
++++ intel_counters.cpp	2026-10-11 21:20:01 +0200
+@@ -38,7 +38,7 @@
+ const static rdcarray<rdcstr> metricSetBlacklist = {"TestOa"};
+ 
+ void *IntelCounters::m_MDLibraryHandle = 0;
+-IMetricsDevice_1_5 *IntelCounters::m_metricsDevice = NULL;
++IMetricsDeviceLatest *IntelCounters::m_metricsDevice = NULL;
+ OpenMetricsDevice_fn IntelCounters::OpenMetricsDevice = NULL;
+ CloseMetricsDevice_fn IntelCounters::CloseMetricsDevice = NULL;
+ 

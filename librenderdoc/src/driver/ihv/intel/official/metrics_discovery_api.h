@@ -1,1 +1,3 @@
-../../../../../../upstream/renderdoc/driver/ihv/intel/official/metrics_discovery_api.h
+// Compatibility shim: RenderDoc includes "official/metrics_discovery_api.h".
+#pragma once
+#include <metrics_discovery_api.h>

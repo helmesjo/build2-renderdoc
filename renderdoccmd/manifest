@@ -20,6 +20,7 @@ depends: librenderdoc == $
 depends: libcmdline ^0.0.1
 builds: -( +macos &gcc ) ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
 builds: -( +windows &gcc ) ; Upstream Windows is Visual Studio only.
+builds: -( +windows &clang ) ; Upstream Windows is the MSVC toolset only.
 builds: -( +windows &static ) ; librenderdoc is shared only on Windows.
 build-include: linux**
 build-include: macos**

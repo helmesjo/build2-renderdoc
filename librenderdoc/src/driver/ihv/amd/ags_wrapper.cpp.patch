@@ -1,0 +1,22 @@
+--- ags_wrapper.cpp.orig	2026-10-10 17:56:24 +0200
++++ ags_wrapper.cpp	2026-10-11 20:13:45 +0200
+@@ -158,7 +158,7 @@
+     extensionParams.uavSlot = reg;
+ 
+     if(reg == 0)
+-      RDCASSERT(space == AGS_DX12_SHADER_INSTRINSICS_SPACE_ID);
++      RDCASSERT(space == AGS_DX12_SHADER_INTRINSICS_SPACE_ID);
+     else
+       RDCASSERT(space == 0);
+ 
+@@ -216,8 +216,8 @@
+ 
+   ID3D12Device *device12 = NULL;
+ 
+-  AGSDX11ReturnedParams::ExtensionsSupported extensionsSupported11 = {};
+-  AGSDX12ReturnedParams::ExtensionsSupported extensionsSupported12 = {};
++  AGSDX11ExtensionsSupported extensionsSupported11 = {};
++  AGSDX12ExtensionsSupported extensionsSupported12 = {};
+ 
+ #define AGS_FUNC(func) decltype(&::func) func = NULL;
+ 

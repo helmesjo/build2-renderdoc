@@ -11,7 +11,6 @@ src/driver/d3d12 symlink=dir
 src/driver/dx symlink=dir
 src/driver/dxgi symlink=dir
 src/driver/gl symlink=dir
-src/driver/ihv/amd/official/DXExt symlink=dir
 src/driver/ihv/amd/official/RGA/elf symlink=dir
 src/driver/ihv/arm symlink=dir
 src/driver/ihv/nv/official/aftermath symlink=dir

@@ -1,0 +1,40 @@
+--- win32_callstack.cpp.orig	2026-10-10 17:56:24 +0200
++++ win32_callstack.cpp	2026-10-11 21:04:59 +0200
+@@ -490,34 +490,9 @@
+   }
+   else
+   {
+-    wchar_t path[MAX_PATH] = {0};
+-    GetModuleFileNameW(GetModuleHandleA(STRINGIZE(RDOC_BASE_NAME) ".dll"), path, MAX_PATH - 1);
+-
+-    wchar_t *slash = wcsrchr(path, '\\');
+-
+-    if(slash)
+-    {
+-      *slash = 0;
+-    }
+-    else
+-    {
+-      slash = wcsrchr(path, '/');
+-
+-      if(slash == 0)
+-      {
+-        ret = false;
+-        return false;
+-      }
+-
+-      *slash = 0;
+-    }
+-#if ENABLED(RDOC_X64)
+-    wcscat_s(path, L"/dbghelp.dll");
+-#else
+-    wcscat_s(path, L"/dbghelp.dll");
+-#endif
+-
+-    module = LoadLibraryW(path);
++    // dbghelp.dll is the Windows system library. No copy ships next to
++    // renderdoc.dll, so load the one in System32.
++    module = LoadLibraryExW(L"dbghelp.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+   }
+ 
+   if(!module)

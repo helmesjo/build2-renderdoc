@@ -1,0 +1,10 @@
+--- d3d12_common.h.orig	2026-10-10 17:56:24 +0200
++++ d3d12_common.h	2026-10-11 21:32:19 +0200
+@@ -27,7 +27,6 @@
+ #define INITGUID
+ 
+ #include "core/core.h"
+-#include "driver/dx/official/D3D12Downlevel.h"
+ #include "driver/dx/official/d3d12.h"
+ #include "driver/dx/official/dxgi1_4.h"
+ #include "driver/shaders/dxbc/dxbc_compile.h"

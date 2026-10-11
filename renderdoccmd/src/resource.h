@@ -1,0 +1,1 @@
+../../upstream/renderdoccmd/resource.h

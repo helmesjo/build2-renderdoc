@@ -37,14 +37,6 @@
 #include "d3d12_common.h"
 #include "d3d12_manager.h"
 
-typedef struct D3D11_RESOURCE_FLAGS
-{
-  UINT BindFlags;
-  UINT MiscFlags;
-  UINT CPUAccessFlags;
-  UINT StructureByteStride;
-} D3D11_RESOURCE_FLAGS;
-
 #include "driver/dx/official/d3d12compatibility.h"
 
 struct IAmdExtD3DFactory;

@@ -17,12 +17,15 @@ using in
 if ($cxx.target.class == 'macos' && $cc.id == 'gcc')
   fail 'librenderdoc requires Clang on macOS: GCC has no Objective-C blocks support'
 
-# Upstream builds only renderdoc.dll on Windows. Capture injects it into the
-# target process, and it loads its embedded data from its own module
-# resources.
+# Upstream builds only renderdoc.dll on Windows, with Visual Studio.
+# Capture injects it into the target process, and it loads its embedded
+# data from its own module resources (data/renderdoc.rc).
 #
 if ($cxx.target.class == 'windows')
 {
+  if ($cxx.target.system != 'win32-msvc')
+    fail 'librenderdoc requires the MSVC toolset on Windows'
+
   switch $bin.lib
   {
     case 'static'

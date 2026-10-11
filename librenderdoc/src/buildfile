@@ -579,6 +579,30 @@ libs{renderdoc}: def{os/win32/comexport}: include = $windows
 
 libs{renderdoc}: file{renderdoc.version}: include = adhoc
 
+# The global hook that loads renderdoc.dll into matching processes, which
+# os/win32/win32_process.cpp expects next to renderdoc.dll. As upstream's
+# renderdocshim.vcxproj, it uses kernel32 and user32 only, not even the
+# CRT. It exports nothing. The .def only makes link.exe still write the
+# import library build2 expects. Nothing links against it, so neither that
+# library nor the pkg-config files are installed.
+#
+./: libs{renderdocshim64}: include = $windows
+
+libs{renderdocshim64}: renderdocshim/{hxx cxx}{renderdocshim} \
+                       def{renderdocshim64}
+libs{renderdocshim64}:
+{
+  cxx.coptions += /MT /GS- /Oi /EHs-c-
+  cxx.loptions += /NODEFAULTLIB /ENTRY:dll_entry
+  cxx.libs = kernel32.lib user32.lib
+}
+
+if $windows
+  {libi pc}{renderdocshim*}: install = false
+
+lib{renderdoc}: renderdocshim/{hxx cxx}{renderdocshim} def{renderdocshim64}: \
+  include = adhoc
+
 if $linux
   libs{renderdoc}: cxx.loptions += \
     "-Wl,--undefined,force_include_libentry" \

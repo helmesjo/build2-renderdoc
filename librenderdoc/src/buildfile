@@ -25,8 +25,7 @@ import impl_libs += libvulkan-headers%lib{vulkan-headers} \
                     libamddxgsa%lib{amddxgsa} \
                     libdevdriverapi-headers%lib{devdriverapi-headers}
 
-# MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
-if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
+if ($cxx.target.class == 'windows')
   import impl_libs += libdirectx-headers%liba{directx-headers} \
                       libags%lib{ags} \
                       libamddxext%lib{amddxext} \
@@ -511,13 +510,9 @@ switch $cxx.target.class
   {
     # D3D and the other graphics APIs are loaded at runtime.
     #
-    win32_libs = kernel32 user32 gdi32 advapi32 shell32 ole32 oleaut32 uuid \
-                 comdlg32 ws2_32 shlwapi setupapi
-
-    if ($cxx.target.system == 'mingw32')
-      cxx.libs += $regex.apply($win32_libs, '(.+)', '-l\1')
-    else
-      cxx.libs += $regex.apply($win32_libs, '(.+)', '\1.lib')
+    cxx.libs += kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib \
+                ole32.lib oleaut32.lib uuid.lib comdlg32.lib ws2_32.lib \
+                shlwapi.lib setupapi.lib
   }
 }
 

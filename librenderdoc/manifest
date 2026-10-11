@@ -33,8 +33,7 @@ depends: libhalf ^2.2.0
 depends: libcmp-core ^4.5.52
 depends: libglslang ^16.5.0
 depends: libplthook ^0.0.1 ? ($cxx.target.class == 'linux')
-depends: libdirectx-headers ^1.619.5 ? \
-  ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
+depends: libdirectx-headers ^1.619.5 ? ($cxx.target.class == 'windows')
 depends: libgpuperfapi-headers ^4.4.1-
 depends: libamddxgsa ^2.15.0-
 depends: libdevdriverapi-headers ^1.7.0-

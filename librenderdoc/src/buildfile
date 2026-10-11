@@ -21,7 +21,8 @@ import impl_libs += libvulkan-headers%lib{vulkan-headers} \
                     libcmp-core%lib{CMP_Core} \
                     libglslang%lib{glslang} \
                     libglslang%lib{glslang-default-resource-limits} \
-                    libgpuperfapi-headers%lib{gpuperfapi-headers}
+                    libgpuperfapi-headers%lib{gpuperfapi-headers} \
+                    libamddxgsa%lib{amddxgsa}
 
 # MSVC/clang-cl only. MinGW uses sysroot D3D headers and is CI-excluded.
 if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')

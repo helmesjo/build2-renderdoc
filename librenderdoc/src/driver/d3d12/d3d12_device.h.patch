@@ -1,0 +1,55 @@
+--- d3d12_device.h.orig	2026-10-10 17:56:24 +0200
++++ d3d12_device.h	2026-10-11 21:32:27 +0200
+@@ -319,23 +319,6 @@
+   }
+ };
+ 
+-struct WrappedDownlevelDevice : public ID3D12DeviceDownlevel
+-{
+-  WrappedID3D12Device &m_pDevice;
+-
+-  WrappedDownlevelDevice(WrappedID3D12Device &dev) : m_pDevice(dev) {}
+-  //////////////////////////////
+-  // implement IUnknown
+-  HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
+-  ULONG STDMETHODCALLTYPE AddRef();
+-  ULONG STDMETHODCALLTYPE Release();
+-  //////////////////////////////
+-  // implement ID3D12DeviceDownlevel
+-  virtual HRESULT STDMETHODCALLTYPE
+-  QueryVideoMemoryInfo(UINT NodeIndex, DXGI_MEMORY_SEGMENT_GROUP MemorySegmentGroup,
+-                       _Out_ DXGI_QUERY_VIDEO_MEMORY_INFO *pVideoMemoryInfo);
+-};
+-
+ struct WrappedDeviceTools : public ID3D12DeviceTools
+ {
+   WrappedID3D12Device &m_pDevice;
+@@ -610,7 +593,6 @@
+   ID3D12Device14 *m_pDevice14;
+   ID3D12DeviceTools *m_pDeviceTools = NULL;
+   ID3D12DeviceTools1 *m_pDeviceTools1 = NULL;
+-  ID3D12DeviceDownlevel *m_pDownlevel;
+ 
+   WrappedID3D12DeviceConfiguration m_DevConfig;
+ 
+@@ -668,7 +650,6 @@
+   ID3D12CommandAllocator *m_OverlayAllocs[MaxOverlayInFlight] = {};
+   ID3D12GraphicsCommandList *m_OverlayLists[MaxOverlayInFlight] = {};
+ 
+-  WrappedDownlevelDevice m_WrappedDownlevel;
+   WrappedDeviceTools m_WrappedDeviceTools;
+   WrappedDRED m_DRED;
+   WrappedDREDSettings m_DREDSettings;
+@@ -1796,12 +1777,6 @@
+       _In_ const D3D12_SERIALIZED_DATA_DRIVER_MATCHING_IDENTIFIER *pIdentifierToCheck);
+ 
+   //////////////////////////////
+-  // implement ID3D12DeviceDownlevel
+-  virtual HRESULT STDMETHODCALLTYPE
+-  QueryVideoMemoryInfo(UINT NodeIndex, DXGI_MEMORY_SEGMENT_GROUP MemorySegmentGroup,
+-                       _Out_ DXGI_QUERY_VIDEO_MEMORY_INFO *pVideoMemoryInfo);
+-
+-  //////////////////////////////
+   // implement ID3D12Device6
+   virtual HRESULT STDMETHODCALLTYPE SetBackgroundProcessingMode(
+       D3D12_BACKGROUND_PROCESSING_MODE Mode, D3D12_MEASUREMENTS_ACTION MeasurementsAction,

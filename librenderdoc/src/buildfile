@@ -498,12 +498,21 @@ switch $cxx.target.class
   }
   case 'windows'
   {
+    # D3D and the other graphics APIs are loaded at runtime.
+    #
+    win32_libs = kernel32 user32 gdi32 advapi32 shell32 ole32 oleaut32 uuid \
+                 comdlg32 ws2_32 shlwapi setupapi
+
     if ($cxx.target.system == 'mingw32')
-      cxx.libs += -ld3d11 -ldxgi -luser32 -lgdi32
+      cxx.libs += $regex.apply($win32_libs, '(.+)', '-l\1')
     else
-      cxx.libs += d3d11.lib dxgi.lib user32.lib gdi32.lib
+      cxx.libs += $regex.apply($win32_libs, '(.+)', '\1.lib')
   }
 }
+
+# The COM entry points of the thumbnail shell extension (win32_shellext.cpp).
+#
+libs{renderdoc}: def{os/win32/comexport}: include = $windows
 
 libs{renderdoc}: file{renderdoc.version}: include = adhoc
 

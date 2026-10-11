@@ -128,8 +128,9 @@ lib{renderdoc}: driver/vulkan/official/hxx{*}: \
 lib{renderdoc}: driver/shaders/spirv/{hxx cxx}{**}: \
   include = ($config.librenderdoc.vulkan || $config.librenderdoc.gl)
 
-# AMD IHV is unconditional. NVIDIA Aftermath follows GL/Vulkan. Extra NV
-# counter TUs match CMake (not Android, not Apple).
+# AMD IHV is unconditional. NVIDIA Aftermath follows GL/Vulkan. The NV
+# counters match CMake and NV.vcxproj (not Android, not Apple), the Intel
+# D3D11 counters and NVAPI match Intel.vcxproj and NV.vcxproj.
 #
 lib{renderdoc}: driver/ihv/amd/{hxx cxx}{amd_counters amd_isa amd_isa_devices amd_rgp} \
                 driver/ihv/amd/hxx{official/RGP/DevDriverAPI}
@@ -138,13 +139,23 @@ lib{renderdoc}: driver/ihv/amd/cxx{amd_isa_win32 amd_hooks}: include = $windows
 lib{renderdoc}: driver/ihv/amd/{hxx cxx}{ags_wrapper}: include = $windows
 lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_aftermath}: \
   include = ($config.librenderdoc.vulkan || $config.librenderdoc.gl)
-lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_counter_enumerator}: include = $linux
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_counter_enumerator}: \
+  include = ($linux || $windows)
 lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_vk_counters}: \
-  include = ($linux && $config.librenderdoc.vulkan)
+  include = (($linux || $windows) && $config.librenderdoc.vulkan)
 lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_gl_counters}: \
-  include = ($linux && $config.librenderdoc.gl)
+  include = (($linux || $windows) && $config.librenderdoc.gl)
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_d3d11_counters}: \
+  include = $config.librenderdoc.d3d11
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nv_d3d12_counters}: \
+  include = $config.librenderdoc.d3d12
+lib{renderdoc}: driver/ihv/nv/{hxx cxx}{nvapi_wrapper} \
+                driver/ihv/nv/cxx{nvapi_hooks}: \
+  include = $windows
 lib{renderdoc}: driver/ihv/intel/{hxx cxx}{intel_gl_counters}: \
   include = $config.librenderdoc.gl
+lib{renderdoc}: driver/ihv/intel/{hxx cxx}{intel_counters}: \
+  include = $config.librenderdoc.d3d11
 lib{renderdoc}: driver/ihv/arm/hxx{arm_counters} \
                 driver/ihv/arm/cxx{arm_counters_stub}: \
   include = $config.librenderdoc.gl

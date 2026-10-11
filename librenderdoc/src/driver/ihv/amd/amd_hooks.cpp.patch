@@ -1,0 +1,41 @@
+--- amd_hooks.cpp.orig	2026-10-10 17:56:24 +0200
++++ amd_hooks.cpp	2026-10-11 20:13:46 +0200
+@@ -51,12 +51,12 @@
+ 
+ #endif
+ 
+-void FilterDX11(AGSDX11ReturnedParams::ExtensionsSupported &extensionsSupported)
++void FilterDX11(AGSDX11ExtensionsSupported &extensionsSupported)
+ {
+   if(AMD_ags_AllowUnknownExtensions())
+     return;
+ 
+-  AGSDX11ReturnedParams::ExtensionsSupported ret = {};
++  AGSDX11ExtensionsSupported ret = {};
+ 
+   // allow all intrinsics features
+   ret.intrinsics16 = extensionsSupported.intrinsics16;
+@@ -70,12 +70,12 @@
+   extensionsSupported = ret;
+ }
+ 
+-void FilterDX12(AGSDX12ReturnedParams::ExtensionsSupported &extensionsSupported)
++void FilterDX12(AGSDX12ExtensionsSupported &extensionsSupported)
+ {
+   if(AMD_ags_AllowUnknownExtensions())
+     return;
+ 
+-  AGSDX12ReturnedParams::ExtensionsSupported ret = {};
++  AGSDX12ExtensionsSupported ret = {};
+ 
+   // allow all intrinsics features
+   ret.intrinsics16 = extensionsSupported.intrinsics16;
+@@ -335,7 +335,7 @@
+       returnedParams->pDevice->QueryInterface(__uuidof(IAGSD3DDevice), (void **)&agsDev);
+ 
+       if(extensionParams->uavSlot == 0)
+-        agsDev->SetShaderExtUAV(AGS_DX12_SHADER_INSTRINSICS_SPACE_ID, 0);
++        agsDev->SetShaderExtUAV(AGS_DX12_SHADER_INTRINSICS_SPACE_ID, 0);
+       else
+         agsDev->SetShaderExtUAV(0, extensionParams->uavSlot);
+     }

@@ -18,7 +18,6 @@ src/driver/ihv/arm symlink=dir
 src/driver/ihv/nv/official/aftermath symlink=dir
 src/driver/ihv/nv/official/nvapi symlink=dir
 src/driver/ihv/nv/official/PerfKit symlink=dir
-src/driver/ihv/nv/official/PerfSDK symlink=dir
 src/driver/shaders/dxbc symlink=dir
 src/driver/shaders/dxil symlink=dir
 src/hooks symlink=dir

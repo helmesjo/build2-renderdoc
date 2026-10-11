@@ -1,0 +1,97 @@
+--- d3d12_device.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d12_device.cpp	2026-10-11 21:32:30 +0200
+@@ -170,28 +170,6 @@
+   return m_pDebug->QueryInterface(riid, ppvObject);
+ }
+ 
+-HRESULT STDMETHODCALLTYPE WrappedDownlevelDevice::QueryInterface(REFIID riid, void **ppvObject)
+-{
+-  return m_pDevice.QueryInterface(riid, ppvObject);
+-}
+-
+-ULONG STDMETHODCALLTYPE WrappedDownlevelDevice::AddRef()
+-{
+-  return m_pDevice.AddRef();
+-}
+-
+-ULONG STDMETHODCALLTYPE WrappedDownlevelDevice::Release()
+-{
+-  return m_pDevice.Release();
+-}
+-
+-HRESULT STDMETHODCALLTYPE WrappedDownlevelDevice::QueryVideoMemoryInfo(
+-    UINT NodeIndex, DXGI_MEMORY_SEGMENT_GROUP MemorySegmentGroup,
+-    _Out_ DXGI_QUERY_VIDEO_MEMORY_INFO *pVideoMemoryInfo)
+-{
+-  return m_pDevice.QueryVideoMemoryInfo(NodeIndex, MemorySegmentGroup, pVideoMemoryInfo);
+-}
+-
+ HRESULT STDMETHODCALLTYPE WrappedDeviceTools::QueryInterface(REFIID riid, void **ppvObject)
+ {
+   return m_pDevice.QueryInterface(riid, ppvObject);
+@@ -559,7 +537,6 @@
+       m_SoftRefCounter(NULL, false),
+       m_pDevice(realDevice),
+       m_debugLayerEnabled(enabledDebugLayer),
+-      m_WrappedDownlevel(*this),
+       m_WrappedDeviceTools(*this),
+       m_DRED(*this),
+       m_DREDSettings(*this),
+@@ -603,7 +580,6 @@
+   m_pDevice12 = NULL;
+   m_pDevice13 = NULL;
+   m_pDevice14 = NULL;
+-  m_pDownlevel = NULL;
+   if(m_pDevice)
+   {
+     m_pDevice->QueryInterface(__uuidof(ID3D12Device1), (void **)&m_pDevice1);
+@@ -628,7 +604,6 @@
+                               (void **)&m_DREDSettings.m_pReal1);
+     m_pDevice->QueryInterface(__uuidof(ID3D12DeviceRemovedExtendedDataSettings2),
+                               (void **)&m_DREDSettings.m_pReal2);
+-    m_pDevice->QueryInterface(__uuidof(ID3D12DeviceDownlevel), (void **)&m_pDownlevel);
+     m_pDevice->QueryInterface(__uuidof(ID3D12DeviceTools), (void **)&m_pDeviceTools);
+     m_pDevice->QueryInterface(__uuidof(ID3D12DeviceTools1), (void **)&m_pDeviceTools1);
+     m_pDevice->QueryInterface(__uuidof(ID3D12CompatibilityDevice), (void **)&m_CompatDevice.m_pReal);
+@@ -986,7 +961,6 @@
+   SAFE_RELEASE(m_DREDSettings.m_pReal2);
+   SAFE_RELEASE(m_CompatDevice.m_pReal);
+   SAFE_RELEASE(m_SharingContract.m_pReal);
+-  SAFE_RELEASE(m_pDownlevel);
+   SAFE_RELEASE(m_pDeviceTools);
+   SAFE_RELEASE(m_pDeviceTools1);
+   SAFE_RELEASE(m_pDevice14);
+@@ -1359,19 +1333,6 @@
+ 
+     return E_NOINTERFACE;
+   }
+-  else if(riid == __uuidof(ID3D12DeviceDownlevel))
+-  {
+-    if(m_pDownlevel)
+-    {
+-      *ppvObject = &m_WrappedDownlevel;
+-      AddRef();
+-      return S_OK;
+-    }
+-    else
+-    {
+-      return E_NOINTERFACE;
+-    }
+-  }
+   else if(riid == __uuidof(ID3D12DeviceTools))
+   {
+     if(m_pDeviceTools)
+@@ -4527,13 +4488,6 @@
+   space = m_GlobalEXTUAVSpace;
+ }
+ 
+-HRESULT STDMETHODCALLTYPE WrappedID3D12Device::QueryVideoMemoryInfo(
+-    UINT NodeIndex, DXGI_MEMORY_SEGMENT_GROUP MemorySegmentGroup,
+-    _Out_ DXGI_QUERY_VIDEO_MEMORY_INFO *pVideoMemoryInfo)
+-{
+-  return m_pDownlevel->QueryVideoMemoryInfo(NodeIndex, MemorySegmentGroup, pVideoMemoryInfo);
+-}
+-
+ FrameRefType WrappedID3D12Device::BindlessRefTypeForRes(ID3D12Resource *wrapped)
+ {
+   // if the resource could be used in any mutable way, assume it's written. Otherwise assume it's

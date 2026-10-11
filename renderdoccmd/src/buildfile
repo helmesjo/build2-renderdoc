@@ -1,11 +1,18 @@
 import libs = librenderdoc%lib{renderdoc}
 import libs += libcmdline%lib{cmdline}
 
+# renderdoccmd_win32.cpp extracts update.zip with miniz.
+#
+if ($cxx.target.class == 'windows')
+  import libs += libminiz%lib{miniz}
+
 exe{renderdoccmd}: {hxx cxx}{renderdoccmd} $libs testscript
 exe{renderdoccmd}: cxx{renderdoccmd_linux}: include = ($cxx.target.class == 'linux')
 exe{renderdoccmd}: cxx{renderdoccmd_apple}: include = ($cxx.target.class == 'macos')
 exe{renderdoccmd}: mm{apple/cocoa_window}: include = ($cxx.target.class == 'macos')
-exe{renderdoccmd}: cxx{renderdoccmd_win32}: include = ($cxx.target.class == 'windows')
+exe{renderdoccmd}: cxx{renderdoccmd_win32} hxx{renderdocshim resource} \
+                   3rdparty/miniz/hxx{miniz}: \
+  include = ($cxx.target.class == 'windows')
 
 # API headers are included as <replay/...> and <app/renderdoc_app.h>.
 # Private to this executable.
@@ -89,5 +96,19 @@ switch $cxx.target.class
     cxx.loptions += "-Wl,--no-as-needed" -rdynamic
   }
   case 'windows'
-    cxx.poptions += -DRENDERDOC_PLATFORM_WIN32
+  {
+    # As upstream's renderdoccmd.vcxproj. resource.h includes "version.h"
+    # from api/replay/, and -I.../3rdparty resolves "miniz/miniz.h" to the
+    # shim there.
+    #
+    cxx.poptions += -DRENDERDOC_PLATFORM_WIN32 -DWIN32 -D_CONSOLE \
+                    -D_CRT_SECURE_NO_WARNINGS -DUNICODE -D_UNICODE \
+                    "-I$src_base/api/replay" "-I$src_base/3rdparty"
+
+    if ($cxx.target.cpu == 'x86_64')
+      cxx.poptions += -DWIN64
+
+    cxx.libs += user32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib \
+                psapi.lib ws2_32.lib
+  }
 }

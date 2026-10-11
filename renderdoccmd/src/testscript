@@ -1,10 +1,21 @@
 : version
 :
-# Linux also prints the windowing systems line.
+# Linux also prints the windowing systems line. Windows prints only the
+# version line.
 #
-$* version >>~"/EOO/"
-/renderdoccmd .+ v1\.45 .*/
-/APIs supported at compile-time: .*/
-/Windowing systems supported at compile-time: .*/?
+if ($cxx.target.class != 'windows')
+{
+  $* version >>~"/EOO/"
+  /renderdoccmd .+ v1\.45 .*/
+  /APIs supported at compile-time: .*/
+  /Windowing systems supported at compile-time: .*/?
 
-EOO
+  EOO
+}
+else
+{
+  $* version >>~"/EOO/"
+  /renderdoccmd .+ v1\.45 .*/
+
+  EOO
+}

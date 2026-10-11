@@ -1,0 +1,87 @@
+--- d3d12_replay.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d12_replay.cpp	2026-10-11 21:32:41 +0200
+@@ -308,8 +308,7 @@
+     SAFE_RELEASE(adapter);
+   }
+ 
+-  // add WARP as long as we're not 12On7 (where we can't use WARP)
+-  if(!m_D3D12On7)
++  // add WARP
+   {
+     GPUDevice dev;
+     dev.vendor = GPUVendor::Software;
+@@ -3546,13 +3545,6 @@
+     errors = m_pDevice->GetShaderCache()->GetShaderBlob(hlsl.c_str(), entry.c_str(), compileFlags,
+                                                         includeDirs, profile.c_str(), &blob);
+ 
+-    if(m_D3D12On7 && blob == NULL && errors.contains("unrecognized compiler target"))
+-    {
+-      profile.back() = '0';
+-      errors = m_pDevice->GetShaderCache()->GetShaderBlob(hlsl.c_str(), entry.c_str(), compileFlags,
+-                                                          includeDirs, profile.c_str(), &blob);
+-    }
+-
+     if(blob == NULL)
+     {
+       id = ResourceId();
+@@ -4479,49 +4471,13 @@
+ 
+   WrappedIDXGISwapChain4::RegisterD3DDeviceCallback(GetD3D12DeviceIfAlloc);
+ 
+-  // this needs to be static, because we don't unload d3d12.dll so the plain LoadLibraryA will
+-  // succeed on subsequent capture loads.
+-  static bool d3d12on7 = false;
+-
+   D3D12Lib = LoadLibraryA("d3d12.dll");
+   if(D3D12Lib == NULL)
+   {
+-    // if it fails try to find D3D12On7 DLLs
+-    d3d12on7 = true;
+-
+-    // if it fails, try in the plugin directory
+-    D3D12Lib = (HMODULE)Process::LoadModule(LocatePluginFile("d3d12", "d3d12.dll"));
+-
+-    // if that succeeded, also load dxilconv7.dll from there
+-    if(D3D12Lib)
+-    {
+-      HMODULE dxilconv = (HMODULE)Process::LoadModule(LocatePluginFile("d3d12", "dxilconv7.dll"));
+-
+-      if(!dxilconv)
+-      {
+-        RETURN_ERROR_RESULT(ResultCode::APIInitFailed,
+-                            "Found d3d12.dll in plugin path, but couldn't load dxilconv7.dll");
+-      }
+-    }
++    if(rdc)
++      RETURN_ERROR_RESULT(ResultCode::APIInitFailed, "Failed to load d3d12.dll");
+     else
+-    {
+-      // if it failed, try one more time in MS's subfolder convention
+-      D3D12Lib = LoadLibraryA("12on7/d3d12.dll");
+-
+-      if(D3D12Lib)
+-      {
+-        RDCWARN(
+-            "Loaded d3d12.dll from 12on7 subfolder."
+-            "Please use RenderDoc's plugins/d3d12/ subfolder instead");
+-      }
+-      else
+-      {
+-        if(rdc)
+-          RETURN_ERROR_RESULT(ResultCode::APIInitFailed, "Failed to load d3d12.dll");
+-        else
+-          RETURN_WARNING_RESULT(ResultCode::APIInitFailed, "Failed to load d3d12.dll");
+-      }
+-    }
++      RETURN_WARNING_RESULT(ResultCode::APIInitFailed, "Failed to load d3d12.dll");
+   }
+ 
+   PFN_D3D12_CREATE_DEVICE createDevicePtr =
+@@ -4831,7 +4787,6 @@
+     RDCLOG("Created device.");
+   D3D12Replay *replay = wrappedDev->GetReplay();
+ 
+-  replay->Set12On7(d3d12on7);
+   replay->SetProxy(isProxy);
+   replay->SetRGP(rgp);
+ 

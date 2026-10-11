@@ -1,0 +1,136 @@
+--- d3d11_counters.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d11_counters.cpp	2026-10-11 21:17:54 +0200
+@@ -27,7 +27,6 @@
+ #include "common/common.h"
+ #include "driver/ihv/amd/amd_counters.h"
+ #include "driver/ihv/intel/intel_counters.h"
+-#include "driver/ihv/nv/nv_counters.h"
+ #include "driver/ihv/nv/nv_d3d11_counters.h"
+ #include "d3d11_context.h"
+ #include "d3d11_debug.h"
+@@ -57,11 +56,6 @@
+     ret.append(m_pAMDCounters->GetPublicCounterIds());
+   }
+ 
+-  if(m_pNVCounters)
+-  {
+-    ret.append(m_pNVCounters->GetPublicCounterIds());
+-  }
+-
+   if(m_pNVPerfCounters)
+   {
+     ret.append(m_pNVPerfCounters->EnumerateCounters());
+@@ -96,10 +90,6 @@
+     {
+       return m_pNVPerfCounters->DescribeCounter(counterID);
+     }
+-    else if(m_pNVCounters)
+-    {
+-      return m_pNVCounters->GetCounterDescription(counterID);
+-    }
+   }
+ 
+   // Intel
+@@ -379,41 +369,6 @@
+   }
+ }
+ 
+-void D3D11Replay::FillTimersNV(uint32_t &eventStartID, uint32_t &sampleIndex,
+-                               rdcarray<uint32_t> &eventIDs, const ActionDescription &actionnode)
+-{
+-  if(actionnode.children.empty())
+-    return;
+-
+-  for(size_t i = 0; i < actionnode.children.size(); i++)
+-  {
+-    const ActionDescription &a = actionnode.children[i];
+-
+-    FillTimersNV(eventStartID, sampleIndex, eventIDs, actionnode.children[i]);
+-
+-    if(a.events.empty() || (!(actionnode.children[i].flags & ActionFlags::Drawcall) &&
+-                            !(actionnode.children[i].flags & ActionFlags::Dispatch)))
+-      continue;
+-
+-    eventIDs.push_back(a.eventId);
+-
+-    m_pDevice->ReplayLog(eventStartID, a.eventId, eReplay_WithoutDraw);
+-
+-    SerializeImmediateContext();
+-
+-    m_pNVCounters->BeginSample(sampleIndex);
+-
+-    m_pDevice->ReplayLog(eventStartID, a.eventId, eReplay_OnlyDraw);
+-
+-    SerializeImmediateContext();
+-
+-    m_pNVCounters->EndSample(sampleIndex);
+-
+-    eventStartID = a.eventId + 1;
+-    sampleIndex++;
+-  }
+-}
+-
+ void D3D11Replay::FillTimersIntel(uint32_t &eventStartID, uint32_t &sampleIndex,
+                                   rdcarray<uint32_t> &eventIDs, const ActionDescription &actionnode)
+ {
+@@ -503,40 +458,6 @@
+   return ret;
+ }
+ 
+-rdcarray<CounterResult> D3D11Replay::FetchCountersNV(const rdcarray<GPUCounter> &counters)
+-{
+-  const FrameStatistics &frameStats = m_FrameRecord.frameInfo.stats;
+-
+-  const uint32_t objectsCount = frameStats.draws.calls + frameStats.dispatches.calls + 1;
+-
+-  rdcarray<CounterResult> ret;
+-
+-  if(m_pNVCounters->PrepareExperiment(counters, objectsCount))
+-  {
+-    SerializeImmediateContext();
+-
+-    uint32_t passCount = m_pNVCounters->BeginExperiment();
+-    uint32_t sampleIndex = 0;
+-    rdcarray<uint32_t> eventIDs;
+-
+-    for(uint32_t passIdx = 0; passIdx < passCount; ++passIdx)
+-    {
+-      m_pNVCounters->BeginPass(passIdx);
+-
+-      uint32_t eventStartID = 0;
+-      sampleIndex = 0;
+-      eventIDs.clear();
+-
+-      FillTimersNV(eventStartID, sampleIndex, eventIDs, m_pImmediateContext->GetRootDraw());
+-
+-      m_pNVCounters->EndPass(passIdx);
+-    }
+-
+-    m_pNVCounters->EndExperiment(eventIDs, ret);
+-  }
+-  return ret;
+-}
+-
+ rdcarray<CounterResult> D3D11Replay::FetchCountersIntel(const rdcarray<GPUCounter> &counters)
+ {
+   m_pIntelCounters->DisableAllCounters();
+@@ -605,19 +526,6 @@
+     }
+   }
+ 
+-  if(m_pNVCounters)
+-  {
+-    // Filter out the AMD counters
+-    rdcarray<GPUCounter> nvCounters;
+-    std::copy_if(counters.begin(), counters.end(), std::back_inserter(nvCounters),
+-                 [](const GPUCounter &c) { return IsNvidiaCounter(c); });
+-
+-    if(!nvCounters.empty())
+-    {
+-      ret = FetchCountersNV(nvCounters);
+-    }
+-  }
+-
+   if(m_pNVPerfCounters)
+   {
+     // Filter out the NvPerf counters

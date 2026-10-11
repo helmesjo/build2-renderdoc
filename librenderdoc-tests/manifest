@@ -15,6 +15,7 @@ topics: graphics, debugger, vulkan, metal, directx
 builds: -static ; vulkan-layer/ needs libs{renderdoc}, which a static-only build does not have.
 builds: -( +macos &gcc ) ; GCC cannot compile Apple SDK Objective-C blocks (same as metal-cpp).
 builds: -( +windows &gcc ) ; Upstream Windows is Visual Studio only.
+builds: -( +windows &clang ) ; Upstream Windows is the MSVC toolset only.
 build-include: macos**
 build-exclude: ** ; Downloads the large pre-built SDK archive from NVIDIA.
 depends: * build2 >= 0.18.0

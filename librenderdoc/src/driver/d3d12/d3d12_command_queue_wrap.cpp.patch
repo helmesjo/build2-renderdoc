@@ -1,0 +1,84 @@
+--- d3d12_command_queue_wrap.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d12_command_queue_wrap.cpp	2026-10-11 21:32:25 +0200
+@@ -1478,81 +1478,6 @@
+   return m_pReal->GetClockCalibration(pGpuTimestamp, pCpuTimestamp);
+ }
+ 
+-HRESULT STDMETHODCALLTYPE WrappedID3D12CommandQueue::Present(
+-    _In_ ID3D12GraphicsCommandList *pOpenCommandList, _In_ ID3D12Resource *pSourceTex2D,
+-    _In_ HWND hWindow, D3D12_DOWNLEVEL_PRESENT_FLAGS Flags)
+-{
+-  // D3D12 on windows 7
+-  if(!RenderDoc::Inst().GetCaptureOptions().allowVSync)
+-  {
+-    Flags = D3D12_DOWNLEVEL_PRESENT_FLAG_NONE;
+-  }
+-
+-  // store the timestamp, thread ID etc. Don't store the duration
+-  SERIALISE_TIME_CALL();
+-
+-  if(IsCaptureMode(m_State))
+-  {
+-    WrappedID3D12GraphicsCommandList *list = (WrappedID3D12GraphicsCommandList *)pOpenCommandList;
+-
+-    // add a marker
+-    D3D12MarkerRegion::Set(list, "ID3D12CommandQueueDownlevel::Present()");
+-
+-    // the list is implicitly closed, serialise that
+-    D3D12ResourceRecord *listRecord = GetRecord(list);
+-
+-    {
+-      CACHE_THREAD_SERIALISER();
+-      ser.SetActionChunk();
+-      SCOPED_SERIALISE_CHUNK(D3D12Chunk::List_Close);
+-      list->Serialise_Close(ser);
+-
+-      listRecord->AddChunk(scope.Get());
+-    }
+-
+-    listRecord->Bake();
+-
+-    // this queue implicitly submits the list, serialise that
+-    ID3D12CommandList *submitlist = list;
+-    ExecuteCommandListsInternal(1, &submitlist, false, true);
+-  }
+-
+-  if(m_pPresentHWND != NULL)
+-  {
+-    // don't let the device actually release any refs on the resource, just make it release
+-    // internal
+-    // resources
+-    m_pPresentSource->AddRef();
+-    m_pDevice->ReleaseSwapchainResources(this, 0, NULL, NULL);
+-  }
+-
+-  if(m_pPresentHWND != hWindow)
+-  {
+-    if(m_pPresentHWND != NULL)
+-    {
+-      Keyboard::RemoveInputWindow(WindowingSystem::Win32, m_pPresentHWND);
+-      RenderDoc::Inst().RemoveFrameCapturer(
+-          DeviceOwnedWindow(m_pDevice->GetFrameCapturerDevice(), m_pPresentHWND));
+-    }
+-
+-    Keyboard::AddInputWindow(WindowingSystem::Win32, hWindow);
+-
+-    RenderDoc::Inst().AddFrameCapturer(
+-        DeviceOwnedWindow(m_pDevice->GetFrameCapturerDevice(), hWindow),
+-        m_pDevice->GetFrameCapturer());
+-  }
+-
+-  m_pPresentSource = pSourceTex2D;
+-  m_pPresentHWND = hWindow;
+-
+-  m_pDevice->WrapSwapchainBuffer(this, GetFormat(), 0, m_pPresentSource);
+-
+-  m_pDevice->Present(pOpenCommandList, this,
+-                     Flags == D3D12_DOWNLEVEL_PRESENT_FLAG_WAIT_FOR_VBLANK ? 1 : 0, 0);
+-
+-  return m_pDownlevel->Present(Unwrap(pOpenCommandList), Unwrap(pSourceTex2D), hWindow, Flags);
+-}
+-
+ template <typename SerialiserType>
+ bool WrappedID3D12CommandQueue::Serialise_SetQueueAnnotation(SerialiserType &ser, rdcstr key,
+                                                              RENDERDOC_AnnotationType valueType,

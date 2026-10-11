@@ -1,0 +1,11 @@
+--- intel_counters.h.orig	2026-10-10 17:56:24 +0200
++++ intel_counters.h	2026-10-11 21:19:59 +0200
+@@ -95,7 +95,7 @@
+   std::map<rdcpair<GPUCounter, uint32_t>, TTypedValue_1_0> m_results;
+ 
+   static void *m_MDLibraryHandle;
+-  static IMetricsDevice_1_5 *m_metricsDevice;
++  static IMetricsDeviceLatest *m_metricsDevice;
+   static OpenMetricsDevice_fn OpenMetricsDevice;
+   static CloseMetricsDevice_fn CloseMetricsDevice;
+ };

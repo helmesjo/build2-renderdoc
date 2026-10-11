@@ -1,0 +1,88 @@
+--- d3d12_outputwindow.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d12_outputwindow.cpp	2026-10-11 21:32:44 +0200
+@@ -190,17 +190,7 @@
+     swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+     swapDesc.Flags = 0;
+ 
+-    HRESULT hr = S_OK;
+-
+-    // on 12On7 just skip creating the swapchain
+-    if(m_D3D12On7)
+-    {
+-      outw.swap = NULL;
+-    }
+-    else
+-    {
+-      hr = m_pFactory->CreateSwapChain(m_pDevice->GetQueue(), &swapDesc, &outw.swap);
+-    }
++    HRESULT hr = m_pFactory->CreateSwapChain(m_pDevice->GetQueue(), &swapDesc, &outw.swap);
+ 
+     if(FAILED(hr))
+     {
+@@ -303,7 +293,7 @@
+ 
+   OutputWindow &outw = m_OutputWindows[id];
+ 
+-  if(outw.wnd == NULL || (outw.swap == NULL && !m_D3D12On7))
++  if(outw.wnd == NULL || outw.swap == NULL)
+     return false;
+ 
+   RECT rect;
+@@ -583,7 +573,7 @@
+ 
+   OutputWindow &outw = m_OutputWindows[id];
+ 
+-  if(!m_D3D12On7 && (m_OutputWindows[id].bb[0] == NULL || m_OutputWindows[id].swap == NULL))
++  if(m_OutputWindows[id].bb[0] == NULL || m_OutputWindows[id].swap == NULL)
+     return;
+ 
+   if(m_OutputWindows[id].col == NULL)
+@@ -604,13 +594,6 @@
+   resolvebarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE;
+   resolvebarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_DEST;
+ 
+-  // because D3D12On7 present is a submit operation, need to submit any pending work here.
+-  if(m_D3D12On7)
+-  {
+-    m_pDevice->ExecuteLists();
+-    m_pDevice->FlushLists();
+-  }
+-
+   ID3D12GraphicsCommandList *list = m_pDevice->GetNewList();
+   if(!list)
+     return;
+@@ -657,34 +640,6 @@
+   if(bbbarrier.Transition.pResource)
+     list->ResourceBarrier(1, &bbbarrier);
+ 
+-  if(m_D3D12On7 && outw.wnd)
+-  {
+-    ID3D12Resource *res = outw.colResolve ? outw.colResolve : outw.col;
+-
+-    D3D12_RESOURCE_BARRIER toPresent = {};
+-
+-    toPresent.Transition.pResource = res;
+-    toPresent.Transition.StateBefore =
+-        outw.colResolve ? D3D12_RESOURCE_STATE_COPY_SOURCE : D3D12_RESOURCE_STATE_RENDER_TARGET;
+-    toPresent.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+-
+-    list->ResourceBarrier(1, &toPresent);
+-
+-    ID3D12CommandQueueDownlevel *downlevel = NULL;
+-    m_pDevice->GetQueue()->QueryInterface(__uuidof(ID3D12CommandQueueDownlevel), (void **)&downlevel);
+-    downlevel->Present(list, res, outw.wnd, D3D12_DOWNLEVEL_PRESENT_FLAG_NONE);
+-    SAFE_RELEASE(downlevel);
+-    m_pDevice->MarkListExecuted((ID3D12GraphicsCommandListX *)list);
+-
+-    list = m_pDevice->GetNewList();
+-    if(!list)
+-      return;
+-
+-    std::swap(toPresent.Transition.StateBefore, toPresent.Transition.StateAfter);
+-
+-    list->ResourceBarrier(1, &toPresent);
+-  }
+-
+   list->Close();
+ 
+   m_pDevice->ExecuteLists();

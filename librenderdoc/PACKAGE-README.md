@@ -62,10 +62,39 @@ that exists for this project's own testing (see `librenderdoc-tests`), not
 a general consumer API. The installed manifest is described above.
 
 
+## Windows
+
+Upstream builds Windows only with Visual Studio, so this package requires
+the MSVC toolset and the shared library. Clang (including clang-cl) and
+MinGW are rejected at configure. Differences from upstream's build:
+
+- `renderdocshim64.dll`, the global capture hook, is built and installed
+  next to `renderdoc.dll`, where `renderdoc.dll` looks for it. It is not an
+  importable target.
+- The embedded shaders and font are Win32 resources of `renderdoc.dll`,
+  compiled with the toolchain's `rc.exe` and `cvtres.exe`. The DXIL helper
+  shaders are not baked with DXC at build time. D3D12 compiles them at
+  runtime with `dxcompiler.dll`, as in upstream builds without DXC, but has
+  no baked fallback.
+- Callstack resolution uses the system `dbghelp.dll` from `System32`
+  instead of a copy next to `renderdoc.dll`. Downloading symbols from a
+  symbol server also needs `symsrv.dll` (Debugging Tools for Windows).
+- D3D12On7 (D3D12 on Windows 7) is patched out. It needs
+  `D3D12Downlevel.h` and `D3D11On12On7.h`, which neither the Windows SDK
+  nor `libdirectx-headers` provides.
+- The NVIDIA PerfKit D3D11 counters are patched out, since the PerfKit
+  headers may not be redistributed. The Nsight Perf SDK counters
+  (`libnvperf`) remain.
+- NVIDIA Aftermath is the stub that upstream's source ships.
+- The AMD AGS headers are `libags` 6.3.1, so the
+  `plugins/amd/ags/amd_ags_x64.dll` that replay loads must be the 6.3.1
+  one. AMD ships it as a prebuilt binary, which this package does not
+  provide.
+
+
 ## Vendored files
 
-A few small files stay in-tree rather than as separate dependencies, since
-none has an independent upstream to unbundle from:
+A few small files stay in-tree rather than as separate dependencies:
 
 - `3rdparty/md5/` - Solar Designer's public-domain MD5, used for DXBC
   shader-bytecode hashing. No versioned upstream, just a wiki page.
@@ -73,6 +102,13 @@ none has an independent upstream to unbundle from:
   profiler marker regions. Ships only inside their installer, not a repo.
 - `3rdparty/include-bin/` - a small build-time tool that embeds shader and
   manifest data as C arrays. No known upstream repo.
+- `driver/ihv/amd/official/RGA/elf/` - the ELF structure definitions from
+  FreeBSD's `sys/sys` (BSD-2-Clause), which the AMD ISA disassembly uses on
+  Windows, where there is no `<elf.h>`. Three headers do not warrant a
+  package.
+- `driver/ihv/intel/official/DriverStorePath.h` - Intel's helper (MIT) for
+  locating the driver's DLLs, added in upstream commit `4a4fdb40e`. It has
+  no public upstream.
 
 
 ## Configuration variables

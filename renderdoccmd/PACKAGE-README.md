@@ -31,6 +31,10 @@ The command-line driver. On macOS it links Cocoa and QuartzCore and must be
 built with Clang (Objective-C blocks in `cocoa_window.mm`). It depends on
 `librenderdoc` from this repository (`depends: librenderdoc == $`).
 
+On Windows it requires the MSVC toolset, as `librenderdoc` does. The global
+capture hook starts `renderdoccmd.exe` from next to `renderdoc.dll`, which
+holds when both packages are installed to the same `bin/`.
+
 
 ## Vulkan capture layer registration
 

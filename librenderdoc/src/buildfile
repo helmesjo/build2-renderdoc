@@ -101,6 +101,7 @@ lib{renderdoc}: os/posix/hxx{posix_network posix_specific}: include = $posix
 lib{renderdoc}: os/posix/linux/cxx{*}: include = $linux
 lib{renderdoc}: os/win32/{hxx cxx}{*}: include = $windows
 lib{renderdoc}: 3rdparty/plthook/hxx{plthook}: include = adhoc
+lib{renderdoc}: 3rdparty/dbghelp/hxx{dbghelp}: include = adhoc
 
 # Vulkan driver.
 #

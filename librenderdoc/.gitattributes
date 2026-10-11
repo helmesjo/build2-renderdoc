@@ -13,7 +13,6 @@ src/driver/dxgi symlink=dir
 src/driver/gl symlink=dir
 src/driver/ihv/amd/official/ags symlink=dir
 src/driver/ihv/amd/official/DXExt symlink=dir
-src/driver/ihv/amd/official/GPUPerfAPI symlink=dir
 src/driver/ihv/amd/official/RGA symlink=dir
 src/driver/ihv/amd/official/RGP symlink=dir
 src/driver/ihv/arm symlink=dir

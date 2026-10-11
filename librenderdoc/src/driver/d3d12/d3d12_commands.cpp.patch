@@ -1,0 +1,78 @@
+--- d3d12_commands.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d12_commands.cpp	2026-10-11 21:32:23 +0200
+@@ -471,47 +471,22 @@
+   return m_pReal->ReleaseKeyedMutex(Unwrap(pHeapOrResourceWithKeyedMutex), Key, pReserved, Reserved);
+ }
+ 
+-HRESULT STDMETHODCALLTYPE WrappedDownlevelQueue::QueryInterface(REFIID riid, void **ppvObject)
+-{
+-  return m_pQueue.QueryInterface(riid, ppvObject);
+-}
+-
+-ULONG STDMETHODCALLTYPE WrappedDownlevelQueue::AddRef()
+-{
+-  return m_pQueue.AddRef();
+-}
+-
+-ULONG STDMETHODCALLTYPE WrappedDownlevelQueue::Release()
+-{
+-  return m_pQueue.Release();
+-}
+-
+-HRESULT STDMETHODCALLTYPE WrappedDownlevelQueue::Present(ID3D12GraphicsCommandList *pOpenCommandList,
+-                                                         ID3D12Resource *pSourceTex2D, HWND hWindow,
+-                                                         D3D12_DOWNLEVEL_PRESENT_FLAGS Flags)
+-{
+-  return m_pQueue.Present(pOpenCommandList, pSourceTex2D, hWindow, Flags);
+-}
+-
+ WrappedID3D12CommandQueue::WrappedID3D12CommandQueue(ResourceId id, ID3D12CommandQueue *real,
+                                                      WrappedID3D12Device *device, CaptureState &state)
+     : RefCounter12(real),
+       m_pDevice(device),
+       m_State(state),
+-      m_WrappedDownlevel(*this),
+       m_WrappedCompat(*this),
+       m_SharingContract(*m_pDevice)
+ {
+   RenderDoc::Inst().RegisterMemoryRegion(this, sizeof(WrappedID3D12CommandQueue));
+ 
+   m_WrappedDebug.m_pQueue = this;
+-  m_pDownlevel = NULL;
+   m_pReal1 = NULL;
+   if(m_pReal)
+   {
+     m_pReal->QueryInterface(__uuidof(ID3D12DebugCommandQueue), (void **)&m_WrappedDebug.m_pReal);
+     m_pReal->QueryInterface(__uuidof(ID3D12DebugCommandQueue1), (void **)&m_WrappedDebug.m_pReal1);
+-    m_pReal->QueryInterface(__uuidof(ID3D12CommandQueueDownlevel), (void **)&m_pDownlevel);
+     m_pReal->QueryInterface(__uuidof(ID3D12CommandQueue1), (void **)&m_pReal1);
+     m_pReal->QueryInterface(__uuidof(ID3D12CompatibilityQueue), (void **)&m_WrappedCompat.m_pReal);
+     m_pReal->QueryInterface(__uuidof(ID3D12SharingContract), (void **)&m_SharingContract.m_pReal);
+@@ -575,7 +550,6 @@
+   m_pDevice->GetResourceManager()->ReleaseResource(GetResourceID());
+   m_pDevice->RemoveQueue(this);
+ 
+-  SAFE_RELEASE(m_pDownlevel);
+   SAFE_RELEASE(m_pReal1);
+ 
+   SAFE_RELEASE(m_WrappedCompat.m_pReal);
+@@ -662,19 +636,6 @@
+     AddRef();
+     return S_OK;
+   }
+-  else if(riid == __uuidof(ID3D12CommandQueueDownlevel))
+-  {
+-    if(m_pDownlevel)
+-    {
+-      *ppvObject = &m_WrappedDownlevel;
+-      AddRef();
+-      return S_OK;
+-    }
+-    else
+-    {
+-      return E_NOINTERFACE;
+-    }
+-  }
+ 
+   return RefCounter12::QueryInterface("ID3D12CommandQueue", riid, ppvObject);
+ }

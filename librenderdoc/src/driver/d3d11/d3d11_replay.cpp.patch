@@ -1,0 +1,51 @@
+--- d3d11_replay.cpp.orig	2026-10-10 17:56:24 +0200
++++ d3d11_replay.cpp	2026-10-11 21:17:39 +0200
+@@ -28,7 +28,6 @@
+ #include "driver/dx/official/d3dcompiler.h"
+ #include "driver/ihv/amd/amd_counters.h"
+ #include "driver/ihv/intel/intel_counters.h"
+-#include "driver/ihv/nv/nv_counters.h"
+ #include "driver/ihv/nv/nv_d3d11_counters.h"
+ #include "driver/shaders/dxbc/dxbc_common.h"
+ #include "maths/camera.h"
+@@ -175,26 +174,16 @@
+       RDCLOG("nVidia GPU detected - trying to initialise nVidia counters");
+       m_pNVCounters = NULL;
+       m_pNVPerfCounters = NULL;
+-      // Legacy NVPMAPI counters
+-      NVCounters *countersNVPMAPI = new NVCounters();
+-      if(countersNVPMAPI && countersNVPMAPI->Init(d3dDevice))
++
++      // Nsight Perf SDK counters
++      NVD3D11Counters *countersNvPerf = new NVD3D11Counters();
++      if(countersNvPerf && countersNvPerf->Init(m_pDevice))
+       {
+-        m_pNVCounters = countersNVPMAPI;
++        m_pNVPerfCounters = countersNvPerf;
+       }
+       else
+       {
+-        delete countersNVPMAPI;
+-
+-        // Nsight Perf SDK counters
+-        NVD3D11Counters *countersNvPerf = new NVD3D11Counters();
+-        if(countersNvPerf && countersNvPerf->Init(m_pDevice))
+-        {
+-          m_pNVPerfCounters = countersNvPerf;
+-        }
+-        else
+-        {
+-          delete countersNvPerf;
+-        }
++        delete countersNvPerf;
+       }
+     }
+     else if(m_DriverInfo.vendor == GPUVendor::Intel)
+@@ -295,7 +284,6 @@
+   m_PixelHistory.Release();
+ 
+   SAFE_DELETE(m_pAMDCounters);
+-  SAFE_DELETE(m_pNVCounters);
+   SAFE_DELETE(m_pNVPerfCounters);
+   SAFE_DELETE(m_pIntelCounters);
+ 

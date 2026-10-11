@@ -35,6 +35,17 @@ depends: libglslang ^16.5.0
 depends: libplthook ^0.0.1 ? ($cxx.target.class == 'linux')
 depends: libdirectx-headers ^1.619.5 ? \
   ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
+depends: libgpuperfapi-headers ^4.4.1-
+depends: libamddxgsa ^2.15.0-
+depends: libdevdriverapi-headers ^1.7.0-
+depends: libnvperf ^2026.3.0- ? \
+  ($cxx.target.cpu == 'x86_64' && \
+   ($cxx.target.class == 'linux' || $cxx.target.class == 'windows'))
+depends: libnvapi ^615.0.0- ? ($cxx.target.class == 'windows')
+depends: libags ^6.3.1- ? ($cxx.target.class == 'windows')
+depends: libamddxext ^4.4.1- ? ($cxx.target.class == 'windows')
+depends: libmetrics-discovery-headers ^1.16.197- ? \
+  ($cxx.target.class == 'windows')
 depends:
 \
 libmetal-cpp ^381.0.0-

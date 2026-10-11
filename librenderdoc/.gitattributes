@@ -14,7 +14,6 @@ src/driver/gl symlink=dir
 src/driver/ihv/amd/official/ags symlink=dir
 src/driver/ihv/amd/official/DXExt symlink=dir
 src/driver/ihv/amd/official/RGA/elf symlink=dir
-src/driver/ihv/amd/official/RGP symlink=dir
 src/driver/ihv/arm symlink=dir
 src/driver/ihv/nv/official/aftermath symlink=dir
 src/driver/ihv/nv/official/nvapi symlink=dir

@@ -31,6 +31,18 @@ The command-line driver. On macOS it links Cocoa and QuartzCore and must be
 built with Clang (Objective-C blocks in `cocoa_window.mm`). It depends on
 `librenderdoc` from this repository (`depends: librenderdoc == $`).
 
+On Windows it requires the MSVC toolset, as `librenderdoc` does. The global
+capture hook starts `renderdoccmd.exe` from next to `renderdoc.dll`, which
+holds when both packages are installed to the same `bin/`.
+
+On Linux the replay preview window looks for the Xlib and XCB headers on
+the compiler search path and, when they are present, links `-lX11`,
+`-lxcb`, and (when both are present) `-lX11-xcb`. Xlib also needs
+`X11/Xlib-xcb.h`, which the source includes whenever
+`RENDERDOC_WINDOWING_XLIB` is set. Wayland is capture-only and links
+nothing here. The development packages that provide these, for example
+on Debian, are `libx11-dev`, `libxcb1-dev`, and `libx11-xcb-dev`.
+
 
 ## Vulkan capture layer registration
 

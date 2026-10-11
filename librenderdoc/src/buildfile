@@ -35,6 +35,12 @@ if ($cxx.target.class == 'macos')
 if ($cxx.target.class == 'linux')
   import impl_libs += libplthook%lib{plthook}
 
+# Nsight Perf SDK headers for the NVIDIA counters. libnvperf is x86_64 only.
+#
+if ($cxx.target.cpu == 'x86_64' && \
+    ($cxx.target.class == 'linux' || $cxx.target.class == 'windows'))
+  import impl_libs += libnvperf%lib{nvperf}
+
 out_pfx = [dir_path] $out_root/src/
 src_pfx = [dir_path] $src_root/src/
 
@@ -385,13 +391,6 @@ if $windows
   vulkan_poptions += -DVK_USE_PLATFORM_WIN32_KHR
 
 obj{driver/vulkan/**}: cxx.poptions += $vulkan_poptions
-
-obj{driver/ihv/nv/**}:
-{
-  cxx.poptions += \
-    "-I$src_pfx/driver/ihv/nv/official/PerfSDK/redist/include" \
-    "-I$src_pfx/driver/ihv/nv/official/PerfSDK/redist/NvPerfUtility/include"
-}
 
 # Match upstream: -fno-strict-aliasing, hidden visibility. No -Wall / -Werror.
 #

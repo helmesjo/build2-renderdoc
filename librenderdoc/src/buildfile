@@ -30,7 +30,8 @@ if ($cxx.target.class == 'windows' && $cxx.target.system != 'mingw32')
   import impl_libs += libdirectx-headers%liba{directx-headers} \
                       libags%lib{ags} \
                       libamddxext%lib{amddxext} \
-                      libnvapi%lib{nvapi}
+                      libnvapi%lib{nvapi} \
+                      libmetrics-discovery-headers%lib{metrics-discovery-headers}
 
 if ($cxx.target.class == 'macos')
   import impl_libs += libmetal-cpp%lib{metal-cpp}

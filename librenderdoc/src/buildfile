@@ -284,7 +284,6 @@ lib{renderdoc}: data/hxx{resource} \
 lib{renderdoc}: driver/ihv/amd/hxx{official/**}: include = adhoc
 lib{renderdoc}: driver/ihv/nv/hxx{official/**}: include = adhoc
 lib{renderdoc}: driver/ihv/intel/hxx{official/**}: include = adhoc
-lib{renderdoc}: driver/ihv/arm/hxx{official/**}: include = adhoc
 
 # Libraries after every source so that each object precedes them on the
 # link line (GCC on Debian and Ubuntu links with --as-needed).

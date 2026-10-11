@@ -1,0 +1,50 @@
+--- d3d12_command_queue.h.orig	2026-10-10 17:56:24 +0200
++++ d3d12_command_queue.h	2026-10-11 21:32:21 +0200
+@@ -129,23 +129,6 @@
+   }
+ };
+ 
+-struct WrappedDownlevelQueue : public ID3D12CommandQueueDownlevel
+-{
+-  WrappedID3D12CommandQueue &m_pQueue;
+-
+-  WrappedDownlevelQueue(WrappedID3D12CommandQueue &q) : m_pQueue(q) {}
+-  //////////////////////////////
+-  // implement IUnknown
+-  HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject);
+-  ULONG STDMETHODCALLTYPE AddRef();
+-  ULONG STDMETHODCALLTYPE Release();
+-  //////////////////////////////
+-  // implement ID3D12CommandQueueDownlevel
+-  virtual HRESULT STDMETHODCALLTYPE Present(ID3D12GraphicsCommandList *pOpenCommandList,
+-                                            ID3D12Resource *pSourceTex2D, HWND hWindow,
+-                                            D3D12_DOWNLEVEL_PRESENT_FLAGS Flags);
+-};
+-
+ class WrappedID3D12GraphicsCommandList;
+ 
+ class WrappedID3D12CommandQueue : public ID3D12CommandQueue1,
+@@ -155,11 +138,8 @@
+ {
+   friend class WrappedID3D12GraphicsCommandList;
+ 
+-  ID3D12CommandQueueDownlevel *m_pDownlevel;
+   ID3D12CommandQueue1 *m_pReal1;
+ 
+-  WrappedDownlevelQueue m_WrappedDownlevel;
+-
+   WrappedID3D12Device *m_pDevice;
+ 
+   WrappedID3D12GraphicsCommandList *m_ReplayList;
+@@ -413,11 +393,6 @@
+                                 UINT64 *pGpuTimestamp, UINT64 *pCpuTimestamp);
+ 
+   virtual D3D12_COMMAND_QUEUE_DESC STDMETHODCALLTYPE GetDesc() { return m_pReal->GetDesc(); }
+-  //////////////////////////////
+-  // implement ID3D12CommandQueueDownlevel
+-  virtual HRESULT STDMETHODCALLTYPE Present(ID3D12GraphicsCommandList *pOpenCommandList,
+-                                            ID3D12Resource *pSourceTex2D, HWND hWindow,
+-                                            D3D12_DOWNLEVEL_PRESENT_FLAGS Flags);
+ 
+   // implement ID3D12CommandQueue1
+   virtual HRESULT STDMETHODCALLTYPE SetProcessPriority(D3D12_COMMAND_QUEUE_PROCESS_PRIORITY Priority)

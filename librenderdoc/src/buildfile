@@ -157,9 +157,11 @@ lib{renderdoc}: driver/metal/{hxx cxx mm}{** -official/metal-cpp}: \
 lib{renderdoc}: driver/metal/official/hxx{metal-cpp}: \
   include = ($config.librenderdoc.metal ? adhoc : false)
 
-# OpenGL. Apple uses CGL, other POSIX uses GLX, Windows uses WGL.
-# GLES/EGL stay off here. Headers stay in the glob so dist ships
-# apple_gl_hook_defs.h (included by gl_hooks.cpp on every platform).
+# OpenGL. Apple uses CGL, other POSIX uses GLX, Windows uses WGL. GLES/EGL
+# stay off except on Windows, where gl_common.h always enables them and
+# upstream's renderdoc_gl.vcxproj builds the EGL backend. Headers stay in
+# the glob so dist ships apple_gl_hook_defs.h (included by gl_hooks.cpp on
+# every platform).
 # precompiled.cpp is MSVC PCH only.
 #
 lib{renderdoc}: driver/gl/{hxx}{**}: include = $config.librenderdoc.gl
@@ -176,7 +178,7 @@ lib{renderdoc}: driver/gl/hxx{apple_gl_hook_defs} \
   include = ($config.librenderdoc.gl && $macos)
 lib{renderdoc}: driver/gl/cxx{glx_platform glx_hooks glx_fake_vk_hooks}: \
   include = ($config.librenderdoc.gl && $linux)
-lib{renderdoc}: driver/gl/cxx{wgl_platform wgl_hooks}: \
+lib{renderdoc}: driver/gl/cxx{wgl_platform wgl_hooks egl_platform egl_hooks}: \
   include = ($config.librenderdoc.gl && $windows)
 
 # D3D11 / D3D12 / DXGI (Windows).
@@ -326,7 +328,10 @@ cc.poptions += -DRDOC_BASE_NAME=renderdoc -DRENDERDOC_EXPORTS -DRELEASE \
 if $config.librenderdoc.vulkan
   cc.poptions += -DRENDERDOC_SUPPORT_VULKAN -DVK_ENABLE_BETA_EXTENSIONS
 
-if $config.librenderdoc.gl
+# On Windows gl_common.h enables GL, GLES, and EGL itself, as upstream's
+# Visual Studio projects do.
+#
+if ($config.librenderdoc.gl && !$windows)
   cc.poptions += -DRENDERDOC_SUPPORT_GL
 
 if $config.librenderdoc.metal
@@ -359,7 +364,39 @@ switch $cxx.target.class
       cc.poptions += -DRENDERDOC_WINDOWING_WAYLAND
   }
   case 'windows'
-    cc.poptions += -DRENDERDOC_PLATFORM_WIN32
+  {
+    # As upstream's Visual Studio projects.
+    #
+    cc.poptions += -DRENDERDOC_PLATFORM_WIN32 -DWIN32 -D_WINDOWS \
+                   -DUNICODE -D_UNICODE
+
+    if ($cxx.target.cpu == 'x86_64')
+      cc.poptions += -DWIN64
+  }
+}
+
+# The Windows sources depend on the precompiled.h that upstream's Visual
+# Studio projects force-include, except the IHV projects and a few third
+# party sources. core/precompiled.h is the common part of every per-driver
+# one. cc.reprocess keeps /FI from also applying to the preprocessed
+# output, which already contains it. obj{}, so that it combines with the
+# obj{driver/vulkan/**} options below.
+#
+if ($cxx.class == 'msvc')
+{
+  for d: api android common core data hooks maths os replay serialise \
+         shaders strings 3rdparty/catch 3rdparty/superluminal \
+         driver/d3d11 driver/d3d12 driver/dx driver/dxgi driver/gl \
+         driver/shaders driver/vulkan
+  {
+    obj{$d/**}:
+    {
+      cxx.poptions += "/FI$src_pfx/core/precompiled.h"
+      cc.reprocess = true
+    }
+  }
+
+  obj{driver/vulkan/vk_serialise}: cxx.coptions += /bigobj
 }
 
 # VK_USE_PLATFORM_* are directory-scoped in upstream

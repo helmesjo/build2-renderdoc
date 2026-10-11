@@ -1,6 +1,21 @@
 --- d3d12_device.h.orig	2026-10-10 17:56:24 +0200
-+++ d3d12_device.h	2026-10-11 21:32:27 +0200
-@@ -319,23 +319,6 @@
++++ d3d12_device.h	2026-10-11 21:35:51 +0200
+@@ -37,14 +37,6 @@
+ #include "d3d12_common.h"
+ #include "d3d12_manager.h"
+ 
+-typedef struct D3D11_RESOURCE_FLAGS
+-{
+-  UINT BindFlags;
+-  UINT MiscFlags;
+-  UINT CPUAccessFlags;
+-  UINT StructureByteStride;
+-} D3D11_RESOURCE_FLAGS;
+-
+ #include "driver/dx/official/d3d12compatibility.h"
+ 
+ struct IAmdExtD3DFactory;
+@@ -319,23 +311,6 @@
    }
  };
  
@@ -24,7 +39,7 @@
  struct WrappedDeviceTools : public ID3D12DeviceTools
  {
    WrappedID3D12Device &m_pDevice;
-@@ -610,7 +593,6 @@
+@@ -610,7 +585,6 @@
    ID3D12Device14 *m_pDevice14;
    ID3D12DeviceTools *m_pDeviceTools = NULL;
    ID3D12DeviceTools1 *m_pDeviceTools1 = NULL;
@@ -32,7 +47,7 @@
  
    WrappedID3D12DeviceConfiguration m_DevConfig;
  
-@@ -668,7 +650,6 @@
+@@ -668,7 +642,6 @@
    ID3D12CommandAllocator *m_OverlayAllocs[MaxOverlayInFlight] = {};
    ID3D12GraphicsCommandList *m_OverlayLists[MaxOverlayInFlight] = {};
  
@@ -40,7 +55,7 @@
    WrappedDeviceTools m_WrappedDeviceTools;
    WrappedDRED m_DRED;
    WrappedDREDSettings m_DREDSettings;
-@@ -1796,12 +1777,6 @@
+@@ -1796,12 +1769,6 @@
        _In_ const D3D12_SERIALIZED_DATA_DRIVER_MATCHING_IDENTIFIER *pIdentifierToCheck);
  
    //////////////////////////////

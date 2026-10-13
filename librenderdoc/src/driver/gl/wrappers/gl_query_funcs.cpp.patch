@@ -1,0 +1,11 @@
+--- gl_query_funcs.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_query_funcs.cpp	2026-10-13 12:06:48 +0200
+@@ -133,7 +133,7 @@
+ GLenum WrappedOpenGL::glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
+ {
+   GLenum ret;
+-  SERIALISE_TIME_CALL(ret = GL.glClientWaitSync(sync, flags, timeout));
++  SERIALISE_TIME_CALL(ret = (GLenum)GL.glClientWaitSync(sync, flags, timeout));
+ 
+   if(IsActiveCapturing(m_State))
+   {

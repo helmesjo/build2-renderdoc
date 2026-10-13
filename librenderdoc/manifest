@@ -47,6 +47,8 @@ depends: libags ^6.3.1- ? ($cxx.target.class == 'windows')
 depends: libamddxext ^4.4.1- ? ($cxx.target.class == 'windows')
 depends: libmetrics-discovery-headers ^1.16.197- ? \
   ($cxx.target.class == 'windows')
+depends: libmicrosoft-pdb >= 2023.4.27- ? \
+  ($config.librenderdoc.d3d11 || $config.librenderdoc.d3d12)
 depends:
 \
 libmetal-cpp ^381.0.0-

@@ -33,3 +33,7 @@ location: https://github.com/helmesjo/build2-GPUOpen-AGS_SDK.git#review
 :
 role: prerequisite
 location: https://github.com/helmesjo/build2-intel-metrics-discovery.git#review
+
+:
+role: prerequisite
+location: https://github.com/helmesjo/build2-microsoft-pdb.git#review

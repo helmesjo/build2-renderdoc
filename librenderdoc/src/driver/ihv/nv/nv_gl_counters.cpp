@@ -28,13 +28,11 @@
 
 #include "driver/gl/gl_driver.h"
 
-// The stock Nsight Perf SDK headers pass the integer GL_RENDERER and
-// GL_VENDOR macros to glGetString, which takes RDCGLenum here. The typed
-// enumerators have the same values.
-#undef GL_RENDERER
-#undef GL_VENDOR
-#define GL_RENDERER eGL_RENDERER
-#define GL_VENDOR eGL_VENDOR
+// The stock Nsight Perf SDK headers include GL/gl.h, which upstream's copy
+// leaves out. Keep it out, as gl_common.h does on Linux: the official
+// headers already declare everything they use.
+#define __gl_h_
+
 #include "NvPerfOpenGL.h"
 #include "NvPerfRangeProfilerOpenGL.h"
 #include "NvPerfScopeExitGuard.h"

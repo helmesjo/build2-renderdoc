@@ -79,6 +79,8 @@ MinGW are rejected at configure. Differences from upstream's build:
 - Callstack resolution uses the system `dbghelp.dll` from `System32`
   instead of a copy next to `renderdoc.dll`. Downloading symbols from a
   symbol server also needs `symsrv.dll` (Debugging Tools for Windows).
+- The DXBC container hash uses the MD5 functions of the system
+  `cryptdll.dll` instead of a bundled MD5 implementation.
 - D3D12On7 (D3D12 on Windows 7) is patched out. It needs
   `D3D12Downlevel.h` and `D3D11On12On7.h`, which neither the Windows SDK
   nor `libdirectx-headers` provides.
@@ -96,8 +98,6 @@ MinGW are rejected at configure. Differences from upstream's build:
 
 A few small files stay in-tree rather than as separate dependencies:
 
-- `3rdparty/md5/` - Solar Designer's public-domain MD5, used for DXBC
-  shader-bytecode hashing. No versioned upstream, just a wiki page.
 - `3rdparty/superluminal/` - Superluminal's C API header for optional
   profiler marker regions. Ships only inside their installer, not a repo.
 - `3rdparty/include-bin/` - a small build-time tool that embeds shader and

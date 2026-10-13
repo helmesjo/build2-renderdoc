@@ -80,7 +80,7 @@ lib{renderdoc}: {hxx txx cxx}{api/**} \
                 {hxx cxx}{shaders/**} \
                 {hxx cxx}{strings/**} \
                 data/{hxx}{embedded_files glsl_shaders} \
-                3rdparty/md5/{hxx c}{*} \
+                3rdparty/md5/hxx{md5} \
                 3rdparty/superluminal/{hxx cxx}{*} \
                 3rdparty/tinyexr/cxx{tinyexr_impl} \
                 3rdparty/stb/c{stb_impl} \
@@ -582,6 +582,12 @@ switch $cxx.target.class
     cxx.libs += kernel32.lib user32.lib gdi32.lib advapi32.lib shell32.lib \
                 ole32.lib oleaut32.lib uuid.lib comdlg32.lib ws2_32.lib \
                 shlwapi.lib setupapi.lib
+
+    # The DXBC container hash uses the MD5 functions of cryptdll.dll (see
+    # 3rdparty/md5/md5.h).
+    #
+    if ($config.librenderdoc.d3d11 || $config.librenderdoc.d3d12)
+      cxx.libs += cryptdll.lib
   }
 }
 

@@ -1,0 +1,101 @@
+--- gl_framebuffer_funcs.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_framebuffer_funcs.cpp	2026-10-13 12:08:37 +0200
+@@ -1692,7 +1692,7 @@
+         buffers[i] = eGL_COLOR_ATTACHMENT0;
+     }
+ 
+-    GL.glFramebufferDrawBuffersEXT(framebuffer.name, n, bufs);
++    GL.glFramebufferDrawBuffersEXT(framebuffer.name, n, (const GLuint *)bufs);
+ 
+     AddResourceInitChunk(framebuffer);
+   }
+@@ -1702,7 +1702,7 @@
+ 
+ void WrappedOpenGL::glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n, const GLenum *bufs)
+ {
+-  SERIALISE_TIME_CALL(GL.glFramebufferDrawBuffersEXT(framebuffer, n, bufs));
++  SERIALISE_TIME_CALL(GL.glFramebufferDrawBuffersEXT(framebuffer, n, (const GLuint *)bufs));
+ 
+   if(IsActiveCapturing(m_State))
+   {
+@@ -1730,7 +1730,7 @@
+ 
+ void WrappedOpenGL::glDrawBuffers(GLsizei n, const GLenum *bufs)
+ {
+-  SERIALISE_TIME_CALL(GL.glDrawBuffers(n, bufs));
++  SERIALISE_TIME_CALL(GL.glDrawBuffers(n, (const GLuint *)bufs));
+ 
+   if(IsCaptureMode(m_State))
+   {
+@@ -1792,7 +1792,8 @@
+         att[i] = eGL_STENCIL_ATTACHMENT;
+     }
+ 
+-    GL.glInvalidateNamedFramebufferData(framebuffer.name, numAttachments, attachments);
++    GL.glInvalidateNamedFramebufferData(framebuffer.name, numAttachments,
++                                        (const GLuint *)attachments);
+ 
+     if(m_ReplayOptions.optimisation != ReplayOptimisationLevel::Fastest)
+     {
+@@ -1842,7 +1843,8 @@
+ void WrappedOpenGL::glInvalidateFramebuffer(GLenum target, GLsizei numAttachments,
+                                             const GLenum *attachments)
+ {
+-  SERIALISE_TIME_CALL(GL.glInvalidateFramebuffer(target, numAttachments, attachments));
++  SERIALISE_TIME_CALL(GL.glInvalidateFramebuffer(target, numAttachments,
++                                                 (const GLuint *)attachments));
+   if(IsCaptureMode(m_State))
+   {
+     GLResourceRecord *record = NULL;
+@@ -1884,7 +1886,8 @@
+ void WrappedOpenGL::glDiscardFramebufferEXT(GLenum target, GLsizei numAttachments,
+                                             const GLenum *attachments)
+ {
+-  SERIALISE_TIME_CALL(GL.glDiscardFramebufferEXT(target, numAttachments, attachments));
++  SERIALISE_TIME_CALL(GL.glDiscardFramebufferEXT(target, numAttachments,
++                                                 (const GLuint *)attachments));
+ 
+   if(IsCaptureMode(m_State))
+   {
+@@ -1925,7 +1928,8 @@
+ void WrappedOpenGL::glInvalidateNamedFramebufferData(GLuint framebuffer, GLsizei numAttachments,
+                                                      const GLenum *attachments)
+ {
+-  SERIALISE_TIME_CALL(GL.glInvalidateNamedFramebufferData(framebuffer, numAttachments, attachments));
++  SERIALISE_TIME_CALL(GL.glInvalidateNamedFramebufferData(framebuffer, numAttachments,
++                                                          (const GLuint *)attachments));
+ 
+   if(IsCaptureMode(m_State))
+   {
+@@ -1989,8 +1993,8 @@
+         att[i] = eGL_STENCIL_ATTACHMENT;
+     }
+ 
+-    GL.glInvalidateNamedFramebufferSubData(framebuffer.name, numAttachments, attachments, x, y,
+-                                           width, height);
++    GL.glInvalidateNamedFramebufferSubData(framebuffer.name, numAttachments,
++                                           (const GLuint *)attachments, x, y, width, height);
+ 
+     if(m_ReplayOptions.optimisation != ReplayOptimisationLevel::Fastest)
+     {
+@@ -2041,7 +2045,8 @@
+                                                const GLenum *attachments, GLint x, GLint y,
+                                                GLsizei width, GLsizei height)
+ {
+-  GL.glInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
++  GL.glInvalidateSubFramebuffer(target, numAttachments, (const GLuint *)attachments, x, y, width,
++                                height);
+ 
+   if(IsCaptureMode(m_State))
+   {
+@@ -2084,8 +2089,8 @@
+                                                         const GLenum *attachments, GLint x, GLint y,
+                                                         GLsizei width, GLsizei height)
+ {
+-  GL.glInvalidateNamedFramebufferSubData(framebuffer, numAttachments, attachments, x, y, width,
+-                                         height);
++  GL.glInvalidateNamedFramebufferSubData(framebuffer, numAttachments, (const GLuint *)attachments,
++                                         x, y, width, height);
+ 
+   if(IsCaptureMode(m_State))
+   {

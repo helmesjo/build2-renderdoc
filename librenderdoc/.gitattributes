@@ -10,7 +10,6 @@ src/driver/dxgi symlink=dir
 src/driver/ihv/amd/official/RGA/elf symlink=dir
 src/driver/ihv/arm symlink=dir
 src/driver/ihv/nv/official/aftermath symlink=dir
-src/driver/shaders/dxbc symlink=dir
 src/driver/shaders/dxil symlink=dir
 src/hooks symlink=dir
 src/os/posix symlink=dir

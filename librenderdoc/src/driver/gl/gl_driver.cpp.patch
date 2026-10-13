@@ -1,0 +1,20 @@
+--- gl_driver.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_driver.cpp	2026-10-13 12:06:48 +0200
+@@ -1476,7 +1476,7 @@
+     if(HasExt[KHR_debug] && GL.glDebugMessageCallback &&
+        RenderDoc::Inst().GetCaptureOptions().apiValidation)
+     {
+-      GL.glDebugMessageCallback(&DebugSnoopStatic, this);
++      GL.glDebugMessageCallback((GLDEBUGPROC)&DebugSnoopStatic, this);
+       GL.glEnable(eGL_DEBUG_OUTPUT_SYNCHRONOUS);
+     }
+ 
+@@ -3353,7 +3353,7 @@
+   // once GL driver is more tested, this can be disabled
+   if(HasExt[KHR_debug] && GL.glDebugMessageCallback)
+   {
+-    GL.glDebugMessageCallback(&DebugSnoopStatic, this);
++    GL.glDebugMessageCallback((GLDEBUGPROC)&DebugSnoopStatic, this);
+     GL.glEnable(eGL_DEBUG_OUTPUT_SYNCHRONOUS);
+   }
+ }

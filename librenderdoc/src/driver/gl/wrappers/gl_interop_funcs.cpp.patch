@@ -1,0 +1,22 @@
+--- gl_interop_funcs.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_interop_funcs.cpp	2026-10-13 12:08:37 +0200
+@@ -1123,7 +1123,8 @@
+                                        const GLuint *textures, const GLenum *srcLayouts)
+ {
+   SERIALISE_TIME_CALL(GL.glWaitSemaphoreEXT(semaphore, numBufferBarriers, buffers,
+-                                            numTextureBarriers, textures, srcLayouts));
++                                            numTextureBarriers, textures,
++                                            (const GLuint *)srcLayouts));
+ 
+   if(IsActiveCapturing(m_State))
+   {
+@@ -1190,7 +1191,8 @@
+                                          const GLuint *textures, const GLenum *dstLayouts)
+ {
+   SERIALISE_TIME_CALL(GL.glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers,
+-                                              numTextureBarriers, textures, dstLayouts));
++                                              numTextureBarriers, textures,
++                                              (const GLuint *)dstLayouts));
+ 
+   if(IsActiveCapturing(m_State))
+   {

@@ -1,0 +1,154 @@
+--- gl_shader_refl.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_shader_refl.cpp	2026-10-13 12:08:37 +0200
+@@ -584,7 +584,8 @@
+     resProps[2] = eGL_OFFSET;
+ 
+   GLint values[numProps] = {-1, -1, -1, -1, -1, -1, -1, -1};
+-  GL.glGetProgramResourceiv(sepProg, query, varIdx, numProps, resProps, numProps, NULL, values);
++  GL.glGetProgramResourceiv(sepProg, query, varIdx, numProps, (const GLuint *)resProps, numProps,
++                            NULL, values);
+ 
+   ShaderConstant var;
+ 
+@@ -829,7 +830,8 @@
+   if(query == eGL_BUFFER_VARIABLE)
+   {
+     GLenum propName = eGL_TOP_LEVEL_ARRAY_STRIDE;
+-    GL.glGetProgramResourceiv(sepProg, query, varIdx, 1, &propName, 1, NULL, &topLevelStride);
++    GL.glGetProgramResourceiv(sepProg, query, varIdx, 1, (const GLuint *)&propName, 1, NULL,
++                              &topLevelStride);
+ 
+     // if ARRAY_SIZE is 0 this is an unbounded array
+     if(values[4] == 0)
+@@ -1283,7 +1285,8 @@
+   for(GLint u = 0; u < numUniforms; u++)
+   {
+     GLint values[numProps];
+-    GL.glGetProgramResourceiv(sepProg, eGL_UNIFORM, u, numProps, resProps, numProps, NULL, values);
++    GL.glGetProgramResourceiv(sepProg, eGL_UNIFORM, u, numProps, (const GLuint *)resProps,
++                              numProps, NULL, values);
+ 
+     ShaderResource res;
+     res.isReadOnly = true;
+@@ -1842,7 +1845,8 @@
+     {
+       GLenum propName = eGL_NAME_LENGTH;
+       GLint len;
+-      GL.glGetProgramResourceiv(sepProg, eGL_SHADER_STORAGE_BLOCK, u, 1, &propName, 1, NULL, &len);
++      GL.glGetProgramResourceiv(sepProg, eGL_SHADER_STORAGE_BLOCK, u, 1, (const GLuint *)&propName,
++                                1, NULL, &len);
+ 
+       char *nm = new char[len + 1];
+       GL.glGetProgramResourceName(sepProg, eGL_SHADER_STORAGE_BLOCK, u, len + 1, NULL, nm);
+@@ -1864,8 +1868,8 @@
+       GLint numMembers = 0;
+ 
+       propName = eGL_NUM_ACTIVE_VARIABLES;
+-      GL.glGetProgramResourceiv(sepProg, eGL_SHADER_STORAGE_BLOCK, u, 1, &propName, 1, NULL,
+-                                (GLint *)&numMembers);
++      GL.glGetProgramResourceiv(sepProg, eGL_SHADER_STORAGE_BLOCK, u, 1, (const GLuint *)&propName,
++                                1, NULL, (GLint *)&numMembers);
+ 
+       char *arr = strchr(nm, '[');
+       const bool isArray = (arr != NULL);
+@@ -1995,7 +1999,8 @@
+     {
+       GLenum nameLen = eGL_NAME_LENGTH;
+       GLint len;
+-      GL.glGetProgramResourceiv(sepProg, eGL_UNIFORM_BLOCK, u, 1, &nameLen, 1, NULL, &len);
++      GL.glGetProgramResourceiv(sepProg, eGL_UNIFORM_BLOCK, u, 1, (const GLuint *)&nameLen, 1,
++                                NULL, &len);
+ 
+       char *nm = new char[len + 1];
+       GL.glGetProgramResourceName(sepProg, eGL_UNIFORM_BLOCK, u, len + 1, NULL, nm);
+@@ -2022,8 +2027,8 @@
+         cblock.bufferBacked = true;
+ 
+         GLenum bufSize = eGL_BUFFER_DATA_SIZE;
+-        GL.glGetProgramResourceiv(sepProg, eGL_UNIFORM_BLOCK, i, 1, &bufSize, 1, NULL,
+-                                  (GLint *)&cblock.byteSize);
++        GL.glGetProgramResourceiv(sepProg, eGL_UNIFORM_BLOCK, i, 1, (const GLuint *)&bufSize, 1,
++                                  NULL, (GLint *)&cblock.byteSize);
+ 
+         sort(ubos[i]);
+ 
+@@ -2081,7 +2086,8 @@
+         // on GLES, or when we don't have native program interface query
+         if(!HasExt[ARB_enhanced_layouts] || !HasExt[ARB_program_interface_query])
+           numSigProps--;
+-        GL.glGetProgramResourceiv(sepProg, sigEnum, i, numSigProps, props, numSigProps, NULL, values);
++        GL.glGetProgramResourceiv(sepProg, sigEnum, i, numSigProps, (const GLuint *)props,
++                                  numSigProps, NULL, values);
+ 
+         char *nm = new char[values[0] + 1];
+         GL.glGetProgramResourceName(sepProg, sigEnum, i, values[0] + 1, NULL, nm);
+@@ -2568,7 +2574,8 @@
+       else
+       {
+         GLint glUsed = 0;
+-        GL.glGetProgramResourceiv(curProg, eGL_UNIFORM, idx, 1, &refEnum, 1, NULL, &glUsed);
++        GL.glGetProgramResourceiv(curProg, eGL_UNIFORM, idx, 1, (const GLuint *)&refEnum, 1, NULL,
++                                  &glUsed);
+         used = (glUsed != 0);
+       }
+     }
+@@ -2616,7 +2623,8 @@
+       else
+       {
+         GLint glUsed = 0;
+-        GL.glGetProgramResourceiv(curProg, eGL_UNIFORM, idx, 1, &refEnum, 1, NULL, &glUsed);
++        GL.glGetProgramResourceiv(curProg, eGL_UNIFORM, idx, 1, (const GLuint *)&refEnum, 1, NULL,
++                                  &glUsed);
+         used = (glUsed != 0);
+       }
+     }
+@@ -2637,7 +2645,7 @@
+         {
+           GLenum prop = eGL_ATOMIC_COUNTER_BUFFER_INDEX;
+           GLuint atomicIndex;
+-          GL.glGetProgramResourceiv(curProg, eGL_UNIFORM, idx, 1, &prop, 1, NULL,
++          GL.glGetProgramResourceiv(curProg, eGL_UNIFORM, idx, 1, (const GLuint *)&prop, 1, NULL,
+                                     (GLint *)&atomicIndex);
+ 
+           if(atomicIndex == GL_INVALID_INDEX)
+@@ -2650,11 +2658,11 @@
+             if(IsGLES)
+             {
+               prop = eGL_BUFFER_BINDING;
+-              GL.glGetProgramResourceiv(curProg, eGL_ATOMIC_COUNTER_BUFFER, atomicIndex, 1, &prop,
+-                                        1, NULL, (GLint *)&slot);
++              GL.glGetProgramResourceiv(curProg, eGL_ATOMIC_COUNTER_BUFFER, atomicIndex, 1,
++                                        (const GLuint *)&prop, 1, NULL, (GLint *)&slot);
+               GLint glUsed = 0;
+               GL.glGetProgramResourceiv(curProg, eGL_ATOMIC_COUNTER_BUFFER, atomicIndex, 1,
+-                                        &refEnum, 1, NULL, &glUsed);
++                                        (const GLuint *)&refEnum, 1, NULL, &glUsed);
+               used = (glUsed != 0);
+             }
+             else
+@@ -2682,11 +2690,11 @@
+         else
+         {
+           GLenum prop = eGL_BUFFER_BINDING;
+-          GL.glGetProgramResourceiv(curProg, eGL_SHADER_STORAGE_BLOCK, idx, 1, &prop, 1, NULL,
+-                                    (GLint *)&slot);
++          GL.glGetProgramResourceiv(curProg, eGL_SHADER_STORAGE_BLOCK, idx, 1,
++                                    (const GLuint *)&prop, 1, NULL, (GLint *)&slot);
+           GLint glUsed = 0;
+-          GL.glGetProgramResourceiv(curProg, eGL_SHADER_STORAGE_BLOCK, idx, 1, &refEnum, 1, NULL,
+-                                    &glUsed);
++          GL.glGetProgramResourceiv(curProg, eGL_SHADER_STORAGE_BLOCK, idx, 1,
++                                    (const GLuint *)&refEnum, 1, NULL, &glUsed);
+           used = (glUsed != 0);
+         }
+       }
+@@ -2756,7 +2764,8 @@
+     else
+     {
+       GLint glUsed = 0;
+-      GL.glGetProgramResourceiv(curProg, eGL_UNIFORM_BLOCK, idx, 1, &refEnum, 1, NULL, &glUsed);
++      GL.glGetProgramResourceiv(curProg, eGL_UNIFORM_BLOCK, idx, 1, (const GLuint *)&refEnum, 1,
++                                NULL, &glUsed);
+       used = (glUsed != 0);
+     }
+   }

@@ -1,0 +1,23 @@
+--- gl_common.h.orig	2026-10-10 17:56:24 +0200
++++ gl_common.h	2026-10-13 12:00:32 +0200
+@@ -63,6 +63,11 @@
+ 
+ #define GL_APICALL
+ 
++// The official headers declare their own GLenum typedef, which the GLenum
++// macro would turn into a conflicting RDCGLenum typedef. Declarations in them
++// use the plain GLenum, everything after them the typed one again.
++#undef GLenum
++
+ // official headers
+ #include "official/glcorearb.h"
+ #include "official/glext.h"
+@@ -287,6 +292,8 @@
+ #error "Unknown platform"
+ #endif
+ 
++#define GLenum RDCGLenum
++
+ #undef None
+ #undef Bool
+ 

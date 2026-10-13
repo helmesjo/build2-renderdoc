@@ -1,0 +1,13 @@
+--- gl_shader_funcs.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_shader_funcs.cpp	2026-10-13 12:08:37 +0200
+@@ -1353,8 +1353,8 @@
+       GLenum prop = eGL_NAME_LENGTH;
+ 
+       GLint length = 1;
+-      GL.glGetProgramResourceiv(program.name, eGL_SHADER_STORAGE_BLOCK, storageBlockIndex, 1, &prop,
+-                                1, NULL, &length);
++      GL.glGetProgramResourceiv(program.name, eGL_SHADER_STORAGE_BLOCK, storageBlockIndex, 1,
++                                (const GLuint *)&prop, 1, NULL, &length);
+ 
+       blockName.resize(length + 1);
+ 

@@ -122,7 +122,9 @@ A few small files stay in-tree rather than as separate dependencies:
 ```
 
 Each flag compiles the corresponding graphics API driver. Metal requires
-macOS. D3D11/D3D12 require Windows.
+macOS. D3D11/D3D12 require Windows. With `config.librenderdoc.gl` this
+package depends on `libopengl-registry` and `libegl-registry` for the
+Khronos OpenGL, OpenGL ES, and EGL headers.
 
 On macOS this package depends on `libmetal-cpp` with
 `config.libmetal_cpp.implementation=true`. A local `official/metal-cpp.h`

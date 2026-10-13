@@ -32,6 +32,8 @@ depends: libtinyfiledialogs ^3.21.4
 depends: libhalf ^2.2.0
 depends: libcmp-core ^4.5.52
 depends: libglslang ^16.5.0
+depends: libopengl-registry ~2026.8.3 ? ($config.librenderdoc.gl)
+depends: libegl-registry ~2026.3.19 ? ($config.librenderdoc.gl)
 depends: libplthook ^0.0.1 ? ($cxx.target.class == 'linux')
 depends: libdirectx-headers ^1.619.5 ? ($cxx.target.class == 'windows')
 depends: libgpuperfapi-headers ^4.4.1-

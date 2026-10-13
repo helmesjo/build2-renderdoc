@@ -25,6 +25,12 @@ import impl_libs += libvulkan-headers%lib{vulkan-headers} \
                     libamddxgsa%lib{amddxgsa} \
                     libdevdriverapi-headers%lib{devdriverapi-headers}
 
+# Khronos OpenGL, OpenGL ES, and EGL headers (driver/gl/official/ shims).
+#
+if $config.librenderdoc.gl
+  import impl_libs += libopengl-registry%lib{opengl-registry} \
+                      libegl-registry%lib{egl-registry}
+
 if ($cxx.target.class == 'windows')
   import impl_libs += libdirectx-headers%liba{directx-headers} \
                       libags%lib{ags} \

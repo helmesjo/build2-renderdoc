@@ -1,1 +1,0 @@
-../../../../../upstream/renderdoc/driver/gl/official/khrplatform.h

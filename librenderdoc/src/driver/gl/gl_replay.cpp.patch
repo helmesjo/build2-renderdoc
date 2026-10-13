@@ -1,0 +1,11 @@
+--- gl_replay.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_replay.cpp	2026-10-13 12:06:48 +0200
+@@ -2717,7 +2717,7 @@
+         GLenum props[] = {bufferBacked ? eGL_OFFSET : eGL_LOCATION};
+         GLint values[] = {0};
+ 
+-        GL.glGetProgramResourceiv(prog, eGL_UNIFORM, idx, ARRAY_COUNT(props), props,
++        GL.glGetProgramResourceiv(prog, eGL_UNIFORM, idx, ARRAY_COUNT(props), (const GLuint *)props,
+                                   ARRAY_COUNT(props), NULL, values);
+ 
+         GLint location = values[0];

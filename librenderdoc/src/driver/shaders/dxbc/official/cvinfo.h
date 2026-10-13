@@ -1,1 +1,3 @@
-../../../../../../upstream/renderdoc/driver/shaders/dxbc/official/cvinfo.h
+// Compatibility shim: RenderDoc includes "official/cvinfo.h".
+#pragma once
+#include <libmicrosoft-pdb/cvinfo.h>

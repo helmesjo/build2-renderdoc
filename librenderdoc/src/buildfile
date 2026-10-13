@@ -31,6 +31,12 @@ if $config.librenderdoc.gl
   import impl_libs += libopengl-registry%lib{opengl-registry} \
                       libegl-registry%lib{egl-registry}
 
+# Microsoft CodeView debug information headers (driver/shaders/dxbc/official/
+# shim), used by the DXBC debug information reader.
+#
+if ($config.librenderdoc.d3d11 || $config.librenderdoc.d3d12)
+  import impl_libs += libmicrosoft-pdb%lib{microsoft-pdb}
+
 if ($cxx.target.class == 'windows')
   import impl_libs += libdirectx-headers%liba{directx-headers} \
                       libags%lib{ags} \

@@ -1,0 +1,20 @@
+--- intel_gl_counters.cpp.orig	2026-10-10 17:56:24 +0200
++++ intel_gl_counters.cpp	2026-10-13 12:06:48 +0200
+@@ -190,7 +190,7 @@
+ 
+   GLuint queryId;
+   GL.glGetFirstPerfQueryIdINTEL(&queryId);
+-  GLenum err = GL.glGetError();
++  GLenum err = (GLenum)GL.glGetError();
+   if(err != eGL_NONE)
+     return false;
+ 
+@@ -304,7 +304,7 @@
+   GL.glCreatePerfQueryINTEL(queryId, &queryHandle);
+   m_glQueries.push_back(queryHandle);
+ 
+-  GLenum err = GL.glGetError();
++  GLenum err = (GLenum)GL.glGetError();
+   if(err != eGL_NONE)
+     return;
+ 

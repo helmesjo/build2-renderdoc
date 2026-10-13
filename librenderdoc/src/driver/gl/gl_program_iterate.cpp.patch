@@ -1,0 +1,34 @@
+--- gl_program_iterate.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_program_iterate.cpp	2026-10-13 12:08:37 +0200
+@@ -642,8 +642,8 @@
+       }
+       else
+       {
+-        GL.glGetProgramResourceiv(progSrc, eGL_UNIFORM, i, numProps, resProps, numProps, NULL,
+-                                  values);
++        GL.glGetProgramResourceiv(progSrc, eGL_UNIFORM, i, numProps, (const GLuint *)resProps,
++                                  numProps, NULL, values);
+       }
+ 
+       // we don't need to consider uniforms within UBOs
+@@ -865,7 +865,8 @@
+       GLenum prop = eGL_BUFFER_BINDING;
+       uint32_t bind = 0;
+ 
+-      GL.glGetProgramResourceiv(progSrc, eGL_UNIFORM_BLOCK, i, 1, &prop, 1, NULL, (GLint *)&bind);
++      GL.glGetProgramResourceiv(progSrc, eGL_UNIFORM_BLOCK, i, 1, (const GLuint *)&prop, 1, NULL,
++                                (GLint *)&bind);
+ 
+       char n[1024] = {0};
+       GL.glGetProgramResourceName(progSrc, eGL_UNIFORM_BLOCK, i, 1023, NULL, n);
+@@ -887,8 +888,8 @@
+       GLenum prop = eGL_BUFFER_BINDING;
+       uint32_t bind = 0;
+ 
+-      GL.glGetProgramResourceiv(progSrc, eGL_SHADER_STORAGE_BLOCK, i, 1, &prop, 1, NULL,
+-                                (GLint *)&bind);
++      GL.glGetProgramResourceiv(progSrc, eGL_SHADER_STORAGE_BLOCK, i, 1, (const GLuint *)&prop, 1,
++                                NULL, (GLint *)&bind);
+ 
+       char n[1024] = {0};
+       GL.glGetProgramResourceName(progSrc, eGL_SHADER_STORAGE_BLOCK, i, 1023, NULL, n);

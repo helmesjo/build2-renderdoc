@@ -1,0 +1,12 @@
+--- gl_initstate.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_initstate.cpp	2026-10-13 12:08:37 +0200
+@@ -2368,7 +2368,8 @@
+       GLuint maxDraws = 0;
+       GL.glGetIntegerv(eGL_MAX_DRAW_BUFFERS, (GLint *)&maxDraws);
+ 
+-      GL.glDrawBuffers(RDCMIN(maxDraws, (GLuint)ARRAY_COUNT(drawbuffers)), drawbuffers);
++      GL.glDrawBuffers(RDCMIN(maxDraws, (GLuint)ARRAY_COUNT(drawbuffers)),
++                       (const GLuint *)drawbuffers);
+ 
+       GL.glReadBuffer(readbuffer);
+ 

@@ -1,0 +1,51 @@
+--- gl_common.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_common.cpp	2026-10-13 12:06:48 +0200
+@@ -542,7 +542,7 @@
+ 
+     GLint dummy = 0;
+     GL.glGetIntegeri_v(eGL_VERTEX_BINDING_BUFFER, 0, &dummy);
+-    err = GL.glGetError();
++    err = (GLenum)GL.glGetError();
+ 
+     if(err != eGL_NONE)
+     {
+@@ -565,7 +565,7 @@
+ 
+     GLint dummy[2] = {0};
+     GL.glGetIntegerv(eGL_POLYGON_MODE, dummy);
+-    err = GL.glGetError();
++    err = (GLenum)GL.glGetError();
+ 
+     if(err != eGL_NONE)
+     {
+@@ -616,7 +616,7 @@
+     GL.glCopyImageSubData(texs[0], eGL_TEXTURE_2D, 0, 0, 0, 0, texs[1], eGL_TEXTURE_2D, 0, 0, 0, 0,
+                           1, 1, 1);
+ 
+-    err = GL.glGetError();
++    err = (GLenum)GL.glGetError();
+ 
+     if(err != eGL_NONE)
+     {
+@@ -721,7 +721,7 @@
+     GLint dummy = 0;
+     GL.glGetProgramPipelineiv(pipe, eGL_COMPUTE_SHADER, &dummy);
+ 
+-    err = GL.glGetError();
++    err = (GLenum)GL.glGetError();
+ 
+     if(err != eGL_NONE)
+     {
+@@ -1553,10 +1553,10 @@
+ void ClearGLErrors()
+ {
+   int i = 0;
+-  GLenum err = GL.glGetError();
++  GLenum err = (GLenum)GL.glGetError();
+   while(err != eGL_NONE)
+   {
+-    err = GL.glGetError();
++    err = (GLenum)GL.glGetError();
+     i++;
+     if(i > 100)
+     {

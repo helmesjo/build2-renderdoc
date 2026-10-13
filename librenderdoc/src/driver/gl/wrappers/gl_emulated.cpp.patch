@@ -1,0 +1,160 @@
+--- gl_emulated.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_emulated.cpp	2026-10-13 12:09:03 +0200
+@@ -271,7 +271,7 @@
+ GLenum APIENTRY _glCheckNamedFramebufferStatusEXT(GLuint framebuffer, GLenum target)
+ {
+   PushPopFramebuffer(target, framebuffer);
+-  return GL.glCheckFramebufferStatus(target);
++  return (GLenum)GL.glCheckFramebufferStatus(target);
+ }
+ 
+ void APIENTRY _glGetNamedFramebufferParameterivEXT(GLuint framebuffer, GLenum pname, GLint *params)
+@@ -330,7 +330,7 @@
+ void APIENTRY _glFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n, const GLenum *bufs)
+ {
+   PushPopFramebuffer(eGL_DRAW_FRAMEBUFFER, framebuffer);
+-  GL.glDrawBuffers(n, bufs);
++  GL.glDrawBuffers(n, (const GLuint *)bufs);
+ }
+ 
+ void APIENTRY _glFramebufferReadBufferEXT(GLuint framebuffer, GLenum mode)
+@@ -352,12 +352,12 @@
+   if(HasExt[ARB_invalidate_subdata])
+   {
+     PushPopFramebuffer(eGL_DRAW_FRAMEBUFFER, framebuffer);
+-    GL.glInvalidateFramebuffer(eGL_DRAW_FRAMEBUFFER, numAttachments, attachments);
++    GL.glInvalidateFramebuffer(eGL_DRAW_FRAMEBUFFER, numAttachments, (const GLuint *)attachments);
+   }
+   else if(HasExt[EXT_discard_framebuffer])
+   {
+     PushPopFramebuffer(eGL_DRAW_FRAMEBUFFER, framebuffer);
+-    GL.glDiscardFramebufferEXT(eGL_DRAW_FRAMEBUFFER, numAttachments, attachments);
++    GL.glDiscardFramebufferEXT(eGL_DRAW_FRAMEBUFFER, numAttachments, (const GLuint *)attachments);
+   }
+   else
+   {
+@@ -372,8 +372,8 @@
+   if(HasExt[ARB_invalidate_subdata])
+   {
+     PushPopFramebuffer(eGL_DRAW_FRAMEBUFFER, framebuffer);
+-    GL.glInvalidateSubFramebuffer(eGL_DRAW_FRAMEBUFFER, numAttachments, attachments, x, y, width,
+-                                  height);
++    GL.glInvalidateSubFramebuffer(eGL_DRAW_FRAMEBUFFER, numAttachments,
++                                  (const GLuint *)attachments, x, y, width, height);
+   }
+   else
+   {
+@@ -1421,12 +1421,12 @@
+     }
+     else if(!layered)
+     {
+-      GLenum status = GL.glCheckFramebufferStatus(eGL_DRAW_FRAMEBUFFER);
++      GLenum status = (GLenum)GL.glCheckFramebufferStatus(eGL_DRAW_FRAMEBUFFER);
+ 
+       if(status != eGL_FRAMEBUFFER_COMPLETE)
+         RDCERR("glCopyImageSubData emulation draw FBO is %s", ToStr(status).c_str());
+ 
+-      status = GL.glCheckFramebufferStatus(eGL_READ_FRAMEBUFFER);
++      status = (GLenum)GL.glCheckFramebufferStatus(eGL_READ_FRAMEBUFFER);
+ 
+       if(status != eGL_FRAMEBUFFER_COMPLETE)
+         RDCERR("glCopyImageSubData emulation read FBO is %s", ToStr(status).c_str());
+@@ -1461,12 +1461,12 @@
+ 
+         if(slice == 0)
+         {
+-          GLenum status = GL.glCheckFramebufferStatus(eGL_DRAW_FRAMEBUFFER);
++          GLenum status = (GLenum)GL.glCheckFramebufferStatus(eGL_DRAW_FRAMEBUFFER);
+ 
+           if(status != eGL_FRAMEBUFFER_COMPLETE)
+             RDCERR("glCopyImageSubData emulation draw FBO is %s for slice 0", ToStr(status).c_str());
+ 
+-          status = GL.glCheckFramebufferStatus(eGL_READ_FRAMEBUFFER);
++          status = (GLenum)GL.glCheckFramebufferStatus(eGL_READ_FRAMEBUFFER);
+ 
+           if(status != eGL_FRAMEBUFFER_COMPLETE)
+             RDCERR("glCopyImageSubData emulation read FBO is %s for slice 0", ToStr(status).c_str());
+@@ -1493,12 +1493,12 @@
+ 
+         if(slice == 0)
+         {
+-          GLenum status = GL.glCheckFramebufferStatus(eGL_DRAW_FRAMEBUFFER);
++          GLenum status = (GLenum)GL.glCheckFramebufferStatus(eGL_DRAW_FRAMEBUFFER);
+ 
+           if(status != eGL_FRAMEBUFFER_COMPLETE)
+             RDCERR("glCopyImageSubData emulation draw FBO is %s for slice 0", ToStr(status).c_str());
+ 
+-          status = GL.glCheckFramebufferStatus(eGL_READ_FRAMEBUFFER);
++          status = (GLenum)GL.glCheckFramebufferStatus(eGL_READ_FRAMEBUFFER);
+ 
+           if(status != eGL_FRAMEBUFFER_COMPLETE)
+             RDCERR("glCopyImageSubData emulation read FBO is %s for slice 0", ToStr(status).c_str());
+@@ -2892,7 +2892,7 @@
+         break;
+     }
+ 
+-    GLenum status = GL.glCheckFramebufferStatus(eGL_FRAMEBUFFER);
++    GLenum status = (GLenum)GL.glCheckFramebufferStatus(eGL_FRAMEBUFFER);
+ 
+     readDirectly = (status == eGL_FRAMEBUFFER_COMPLETE);
+   }
+@@ -3070,7 +3070,7 @@
+       GL.glFramebufferTextureLayer(eGL_FRAMEBUFFER, eGL_COLOR_ATTACHMENT0, readtex, 0, 0);
+     }
+ 
+-    GLenum fbostatus = GL.glCheckFramebufferStatus(eGL_FRAMEBUFFER);
++    GLenum fbostatus = (GLenum)GL.glCheckFramebufferStatus(eGL_FRAMEBUFFER);
+ 
+     if(fbostatus != eGL_FRAMEBUFFER_COMPLETE)
+       RDCERR("glReadPixels emulation blit FBO is %s with format %s", ToStr(fbostatus).c_str(),
+@@ -3373,7 +3373,7 @@
+         break;
+     }
+ 
+-    GLenum status = GL.glCheckFramebufferStatus(eGL_FRAMEBUFFER);
++    GLenum status = (GLenum)GL.glCheckFramebufferStatus(eGL_FRAMEBUFFER);
+ 
+     if(status != eGL_FRAMEBUFFER_COMPLETE)
+       RDCERR("glReadPixels emulation FBO is %s", ToStr(status).c_str());
+@@ -3691,11 +3691,11 @@
+ 
+ void GLDispatchTable::EmulateUnsupportedFunctions()
+ {
+-#define EMULATE_UNSUPPORTED(func)             \
+-  if(!this->func)                             \
+-  {                                           \
+-    RDCLOG("Emulating " #func);               \
+-    this->func = &CONCAT(glEmulate::_, func); \
++#define EMULATE_UNSUPPORTED(func)                                   \
++  if(!this->func)                                                   \
++  {                                                                 \
++    RDCLOG("Emulating " #func);                                     \
++    this->func = (decltype(this->func))&CONCAT(glEmulate::_, func); \
+   }
+ 
+   EMULATE_UNSUPPORTED(glTransformFeedbackBufferBase)
+@@ -3722,7 +3722,8 @@
+   // glClearNamedFramebufferfi - if the arguments were mismatched it would explain both invalid
+   // argument errors and ABI problems. For now though (and since as mentioned above it's cheap to
+   // emulate) we leave it on. See issue #842
+-  this->glClearNamedFramebufferfi = &glEmulate::_glClearNamedFramebufferfi;
++  this->glClearNamedFramebufferfi =
++      (decltype(this->glClearNamedFramebufferfi))&glEmulate::_glClearNamedFramebufferfi;
+ 
+   // workaround for AMD bug or weird behaviour. glVertexArrayElementBuffer doesn't update the
+   // GL_ELEMENT_ARRAY_BUFFER_BINDING global query, when binding the VAO subsequently *will*.
+@@ -3735,10 +3736,11 @@
+ 
+ void GLDispatchTable::EmulateRequiredExtensions()
+ {
+-#define EMULATE_FUNC(func) this->func = &CONCAT(glEmulate::_, func);
++#define EMULATE_FUNC(func) this->func = (decltype(this->func))&CONCAT(glEmulate::_, func);
+ 
+-#define SAVE_REAL_FUNC(func)                                                       \
+-  if(!glEmulate::CONCAT(func, _real) && this->func != &CONCAT(glEmulate::_, func)) \
++#define SAVE_REAL_FUNC(func)                                                  \
++  if(!glEmulate::CONCAT(func, _real) &&                                       \
++     this->func != (decltype(this->func))&CONCAT(glEmulate::_, func))         \
+     glEmulate::CONCAT(func, _real) = this->func;
+ 
+   // this one is more complex as we need to implement the copy ourselves by creating FBOs and doing

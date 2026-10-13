@@ -13,7 +13,6 @@ src/driver/ihv/nv/official/aftermath symlink=dir
 src/driver/shaders/dxbc symlink=dir
 src/driver/shaders/dxil symlink=dir
 src/hooks symlink=dir
-src/maths symlink=dir
 src/os/posix symlink=dir
 src/renderdocshim symlink=dir
 src/replay symlink=dir

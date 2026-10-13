@@ -1,5 +1,4 @@
 src/3rdparty/include-bin symlink=dir
-src/3rdparty/md5 symlink=dir
 src/3rdparty/superluminal symlink=dir
 src/android symlink=dir
 src/api symlink=dir

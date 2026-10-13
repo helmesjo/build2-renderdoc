@@ -1,1 +1,3 @@
-../../../../../upstream/renderdoc/driver/gl/official/eglplatform.h
+// Compatibility shim: RenderDoc includes "official/eglplatform.h".
+#pragma once
+#include <EGL/eglplatform.h>

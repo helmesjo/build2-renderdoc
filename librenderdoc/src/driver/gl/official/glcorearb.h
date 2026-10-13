@@ -1,1 +1,3 @@
-../../../../../upstream/renderdoc/driver/gl/official/glcorearb.h
+// Compatibility shim: RenderDoc includes "official/glcorearb.h".
+#pragma once
+#include <GL/glcorearb.h>

@@ -1,0 +1,88 @@
+--- gl_hooks.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_hooks.cpp	2026-10-13 12:06:59 +0200
+@@ -22,6 +22,10 @@
+  * THE SOFTWARE.
+  ******************************************************************************/
+ 
++// The hooks below declare the GLES entry points with the typed RDCGLenum,
++// which conflicts with the prototypes of the official GLES header.
++#define GL_GLES_PROTOTYPES 0
++
+ #include "hooks/hooks.h"
+ #include "apple_gl_hook_defs.h"
+ #include "gl_common.h"
+@@ -29,6 +33,8 @@
+ #include "gl_dispatch_table_defs.h"
+ #include "gl_driver.h"
+ 
++#include <type_traits>
++
+ #if ENABLED(RDOC_POSIX)
+ #include <dlfcn.h>
+ #endif
+@@ -147,6 +153,53 @@
+   return (const GLubyte *)"";
+ }
+ 
++// The dispatch table has the function pointer types of the official headers,
++// where GLenum is the plain typedef, while the hooks take the typed RDCGLenum
++// (see gl_common.h). Call through a pointer with the hook's argument types and
++// convert the result to what the hook returns.
++template <typename R>
++struct UninitResult
++{
++  R value;
++
++  template <typename T>
++  operator T() const
++  {
++    return (T)value;
++  }
++};
++
++template <typename R, typename... P>
++struct UninitCaller
++{
++  R(APIENTRY *function)(P...);
++
++  template <typename... A>
++  auto operator()(A... args) const
++  {
++    auto real = (R(APIENTRY *)(A...))function;
++
++    if constexpr(std::is_void<R>::value)
++      return real(args...);
++    else
++      return UninitResult<R>{real(args...)};
++  }
++
++  auto fallback() const
++  {
++    if constexpr(std::is_void<R>::value)
++      return;
++    else
++      return UninitResult<R>{default_ret<R>()};
++  }
++};
++
++template <typename R, typename... P>
++UninitCaller<R, P...> UninitCall(R(APIENTRY *function)(P...))
++{
++  return {function};
++}
++
+ // on windows we can be injected and not ready to capture when we intercept a GL call. If that
+ // happens we need to skip and call the real function
+ 
+@@ -159,9 +212,9 @@
+     if(GL.function == NULL)                                                                     \
+     {                                                                                           \
+       RDCERR("No function pointer for '%s' while doing replay fallback!", STRINGIZE(function)); \
+-      return default_ret<decltype(GL.function(__VA_ARGS__))>();                                 \
++      return UninitCall(GL.function).fallback();                                                \
+     }                                                                                           \
+-    return GL.function(__VA_ARGS__);                                                            \
++    return UninitCall(GL.function)(__VA_ARGS__);                                                \
+   }
+ 
+ DefineSupportedHooks();

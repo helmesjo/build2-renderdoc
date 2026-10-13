@@ -1,0 +1,82 @@
+--- gl_get_funcs.cpp.orig	2026-10-10 17:56:24 +0200
++++ gl_get_funcs.cpp	2026-10-13 12:08:37 +0200
+@@ -29,12 +29,12 @@
+ 
+ GLenum WrappedOpenGL::glGetError()
+ {
+-  return GL.glGetError();
++  return (GLenum)GL.glGetError();
+ }
+ 
+ GLenum WrappedOpenGL::glGetGraphicsResetStatus()
+ {
+-  return GL.glGetGraphicsResetStatus();
++  return (GLenum)GL.glGetGraphicsResetStatus();
+ }
+ 
+ GLboolean WrappedOpenGL::glIsEnabled(GLenum cap)
+@@ -839,7 +839,7 @@
+ 
+ GLenum WrappedOpenGL::glCheckFramebufferStatus(GLenum target)
+ {
+-  return GL.glCheckFramebufferStatus(target);
++  return (GLenum)GL.glCheckFramebufferStatus(target);
+ }
+ 
+ void WrappedOpenGL::glGetVertexAttribiv(GLuint index, GLenum pname, GLint *params)
+@@ -908,7 +908,7 @@
+ void WrappedOpenGL::glGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei *length,
+                                        GLenum *binaryFormat, void *binary)
+ {
+-  GL.glGetProgramBinary(program, bufSize, length, binaryFormat, binary);
++  GL.glGetProgramBinary(program, bufSize, length, (GLuint *)binaryFormat, binary);
+ }
+ 
+ void WrappedOpenGL::glGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei *length,
+@@ -944,8 +944,8 @@
+                                            GLsizei propCount, const GLenum *props, GLsizei bufSize,
+                                            GLsizei *length, GLint *params)
+ {
+-  GL.glGetProgramResourceiv(program, programInterface, index, propCount, props, bufSize, length,
+-                            params);
++  GL.glGetProgramResourceiv(program, programInterface, index, propCount, (const GLuint *)props,
++                            bufSize, length, params);
+ }
+ 
+ void WrappedOpenGL::glGetProgramResourceName(GLuint program, GLenum programInterface, GLuint index,
+@@ -1036,7 +1036,7 @@
+ void WrappedOpenGL::glGetActiveUniform(GLuint program, GLuint index, GLsizei bufSize,
+                                        GLsizei *length, GLint *size, GLenum *type, GLchar *name)
+ {
+-  GL.glGetActiveUniform(program, index, bufSize, length, size, type, name);
++  GL.glGetActiveUniform(program, index, bufSize, length, size, (GLuint *)type, name);
+ }
+ 
+ void WrappedOpenGL::glGetActiveUniformsiv(GLuint program, GLsizei uniformCount,
+@@ -1067,7 +1067,7 @@
+ void WrappedOpenGL::glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize,
+                                       GLsizei *length, GLint *size, GLenum *type, GLchar *name)
+ {
+-  GL.glGetActiveAttrib(program, index, bufSize, length, size, type, name);
++  GL.glGetActiveAttrib(program, index, bufSize, length, size, (GLuint *)type, name);
+ }
+ 
+ void WrappedOpenGL::glGetActiveAtomicCounterBufferiv(GLuint program, GLuint bufferIndex,
+@@ -1182,7 +1182,7 @@
+                                                   GLsizei *length, GLsizei *size, GLenum *type,
+                                                   GLchar *name)
+ {
+-  GL.glGetTransformFeedbackVarying(program, index, bufSize, length, size, type, name);
++  GL.glGetTransformFeedbackVarying(program, index, bufSize, length, size, (GLuint *)type, name);
+ }
+ 
+ void WrappedOpenGL::glGetTransformFeedbacki64_v(GLuint xfb, GLenum pname, GLuint index, GLint64 *param)
+@@ -1251,7 +1251,7 @@
+ 
+ GLenum WrappedOpenGL::glCheckNamedFramebufferStatusEXT(GLuint framebuffer, GLenum target)
+ {
+-  return GL.glCheckNamedFramebufferStatusEXT(framebuffer, target);
++  return (GLenum)GL.glCheckNamedFramebufferStatusEXT(framebuffer, target);
+ }
+ 
+ void WrappedOpenGL::glGetNamedBufferParameterivEXT(GLuint buffer, GLenum pname, GLint *params)
